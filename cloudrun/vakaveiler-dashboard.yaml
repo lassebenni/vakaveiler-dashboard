@@ -4,7 +4,7 @@ metadata:
   annotations:
     run.googleapis.com/ingress: all
     run.googleapis.com/ingress-status: all
-    run.googleapis.com/operation-id: 343e28ab-f483-458f-a587-a047b4739a06
+    run.googleapis.com/operation-id: ff00fa4e-ae8d-4406-a2eb-4bc15a6b2fc5
   labels:
     cloud.googleapis.com/location: europe-west3
     run.googleapis.com/satisfiesPzs: 'true'
@@ -22,7 +22,7 @@ spec:
     spec:
       containerConcurrency: 80
       containers:
-      - image: eu.gcr.io/lasse-benninga-sndbx-y/vakaveiler-dashboard@sha256:660f8298fac69b8a0f2984764edbdfaf20a26615a47061c488caba319c36e9da
+      - image: eu.gcr.io/lasse-benninga-sndbx-y/vakaveiler-dashboard@sha256:6e0294cd053dbc0cf6557aa07354dc2b575c02a64a008a31deae8b1eae538a4c
         ports:
         - containerPort: 80
           name: http1

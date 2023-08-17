@@ -11,9 +11,7 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 # Copy the rest of the files from the host into the image
-COPY .evidence .
-COPY pages .
-COPY auctions.duckdb .
+COPY . .
 
 # Build the Svelte app
 RUN npm run build

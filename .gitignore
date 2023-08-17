@@ -11,3 +11,12 @@ analysis/veilingen.sqlite
 .evidence/template/svelte.config.js
 .evidence/template/tailwind.config.cjs
 .evidence/template/vite.config.js
+.evidence/template/build/_app
+.evidence/template/build/api
+.evidence/template/build/auctions
+.evidence/template/build/__data.json
+.evidence/template/build/apple-touch-ico-precomposed.png
+.evidence/template/build/apple-touch-icon.png
+.evidence/template/build/favicon.ico
+.evidence/template/build/index.html
+build
