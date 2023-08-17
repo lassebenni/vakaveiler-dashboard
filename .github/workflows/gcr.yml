@@ -37,5 +37,24 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - name: Deploy evidence to cloudrun
-        run: make evidence-cloudrun-deploy
+
+      - name: Install
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v2.0
+        with:
+          publish-dir: './build'
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "Deploy from GitHub Actions"
+          enable-pull-request-comment: false
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_PAT }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE }}
+        timeout-minutes: 1
