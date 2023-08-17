@@ -1,12 +1,12 @@
 ```sql stats
 select
     title,
-    max(md5(title)) as auction_id,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     min(day) as first_day,
     max(day) as last_day,
-    count(*) as total
+    count(*) as total,
+    max(md5(title)) as auction_id,
   from bids
   group by 1
 ```
@@ -28,19 +28,20 @@ Total auctions: <b><Value data={stats.filter(d=>d.auction_id === $page.params.au
 
 # Daily
 
-Highest and lowest winning bids per day.
 
 ```sql winning_bids
 select
     title,
     day,
-    max(md5(title)) as auction_id,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
-    count(winning_bid) as total
+    count(winning_bid) as total,
+    max(md5(title)) as auction_id,
   from bids
   group by 1, 2
 ```
+
+Highest and lowest winning bids per day.
 
 <LineChart
   data={winning_bids.filter(d=>d.auction_id === $page.params.auction_id)}
@@ -48,19 +49,30 @@ select
   y={["lowest_price", "highest_price"]}
 />
 
+Total auctions per day.
+
+<LineChart
+  data={winning_bids.filter(d=>d.auction_id === $page.params.auction_id)}
+  x=day
+  y="total"
+/>
+
+
 ```sql daily_bids
 select
     title,
     day,
-    max(md5(title)) as auction_id,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     count(*) as total,
-    sum(count(*)) over (partition by title) as daily_bids
+    sum(count(*)) over (partition by title) as daily_bids,
+    max(md5(title)) as auction_id,
   from bids
   group by 1, 2
   order by day desc
 ```
+
+Table for daily winners.
 
 <DataTable 
   data="{daily_bids.filter(d=>d.auction_id === $page.params.auction_id)}"
@@ -76,15 +88,17 @@ select
 select
     title,
     extract('hour' FROM strptime(inserted_at, '%Y-%m-%d %H:%M:%S.%f')) as hour,
-    max(md5(title)) as auction_id,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     count(*) as total,
-    sum(count(*)) over (partition by title) as daily_bids
+    sum(count(*)) over (partition by title) as daily_bids,
+    max(md5(title)) as auction_id,
   from bids
   group by 1, 2
-  order by hour desc
+  order by hour asc
 ```
+
+Winners per hour of the day.
 
 <BarChart
   data={hourly_bids.filter(d=>d.auction_id === $page.params.auction_id)}
@@ -92,11 +106,64 @@ select
   y={["lowest_price", "highest_price"]}
 />
 
+Total auctions per hour of the day.
+
+<BarChart
+  data={hourly_bids.filter(d=>d.auction_id === $page.params.auction_id)}
+  x=hour
+  y=total
+/>
+
+Table for hourly winners.
+
 <DataTable 
   data="{hourly_bids.filter(d=>d.auction_id === $page.params.auction_id)}"
   search="true"
   sortable="true"
 />
+
+<!-- 
+# Per minute
+
+```sql minute_bids
+select
+    title,
+    extract('hour' FROM strptime(inserted_at, '%Y-%m-%d %H:%M:%S.%f')) as hour,
+    extract('minute' FROM strptime(inserted_at, '%Y-%m-%d %H:%M:%S.%f')) as minute,
+    concat(hour,minute) as hour_min,
+    IF(hour between 0 and 6, 1, 0) as is_night,
+    max(md5(title)) as auction_id,
+    min(winning_bid) as lowest_price,
+    max(winning_bid) as highest_price,
+    count(*) as total,
+    sum(count(*)) over (partition by title) as daily_bids
+  from bids
+  group by 1, 2, 3
+  order by hour_min asc
+```
+
+Winners per hour/minute of the day.
+
+<LineChart
+  data={minute_bids.filter(d=>d.auction_id === $page.params.auction_id)}
+  x=hour_min
+  y={["lowest_price", "highest_price"]}
+/>
+
+Total bids per hour/minute of the day.
+
+<LineChart
+  data={minute_bids.filter(d=>d.auction_id === $page.params.auction_id)}
+  x=hour_min
+  y=total
+/>
+
+<DataTable 
+  data="{minute_bids.filter(d=>d.auction_id === $page.params.auction_id)}"
+  search="true"
+  sortable="true"
+/> -->
+
 
 ---
 
@@ -107,29 +174,42 @@ select
     title,
     extract('dayofweek' FROM strptime(inserted_at, '%Y-%m-%d %H:%M:%S.%f')) as day_nr,
     CASE EXTRACT('dayofweek' FROM strptime(inserted_at, '%Y-%m-%d %H:%M:%S.%f'))
-        WHEN 0 THEN 'Sunday'
-        WHEN 1 THEN 'Monday'
-        WHEN 2 THEN 'Tuesday'
-        WHEN 3 THEN 'Wednesday'
-        WHEN 4 THEN 'Thursday'
-        WHEN 5 THEN 'Friday'
-        WHEN 6 THEN 'Saturday'
+        WHEN 0 THEN 'Sun.'
+        WHEN 1 THEN 'Mon.'
+        WHEN 2 THEN 'Tue.'
+        WHEN 3 THEN 'Wed.'
+        WHEN 4 THEN 'Thu.'
+        WHEN 5 THEN 'Fri.'
+        WHEN 6 THEN 'Sat.'
      END AS weekday,
-    max(md5(title)) as auction_id,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     count(*) as total,
-    sum(count(*)) over (partition by title) as total_bids
+    sum(count(*)) over (partition by title) as total_bids,
+    max(md5(title)) as auction_id,
   from bids
   group by 1, 2
   order by day_nr asc
 ```
 
+Winners on each day of the week.
+
 <BarChart
   data={weekday_bids.filter(d=>d.auction_id === $page.params.auction_id)}
   x=weekday
   y={["lowest_price", "highest_price"]}
+  type=grouped
 />
+
+Total auctions on each day of the week.
+
+<BarChart
+  data={weekday_bids.filter(d=>d.auction_id === $page.params.auction_id)}
+  x=weekday
+  y=total
+/>
+
+Weekday winners table.
 
 <DataTable 
   data="{weekday_bids.filter(d=>d.auction_id === $page.params.auction_id)}"
@@ -139,7 +219,7 @@ select
 
 ---
 
-# Winners
+# Customers
 
 ```sql bidders
 select
@@ -148,23 +228,28 @@ select
     first_name,
     last_name,
     case when first_name is null then 'Unknown' else concat(first_name,' ', last_name) end as customer_name,
-    max(md5(title)) as auction_id,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     min(day) as first_day,
     max(day) as last_day,
     count(*) as total,
-    sum(count(*)) over (partition by title) as daily_bids
+    sum(count(*)) over (partition by title) as daily_bids,
+    max(md5(title)) as auction_id,
   from bids
   group by title, customer_id, first_name, last_name
+  order by total desc
 ```
+
+Total number of won auctions per customer.
 
 <BarChart
   data={bidders.filter(d=>d.auction_id === $page.params.auction_id)}
-  x=customer_name
-  y={["lowest_price", "highest_price"]}
+  x="customer_name"
+  y="total"
 />
 
+Table for customer's that won this auction.
+ 
 <DataTable 
   data="{bidders.filter(d=>d.auction_id === $page.params.auction_id)}"
   search="true"
@@ -173,16 +258,17 @@ select
 
 ---
 
-# All wins
+# All auctions
 
 ```sql all_bids
 select *, md5(title) as auction_id
 from bids
 ```
 
+Table for all auction data.
+
 <DataTable
   data="{all_bids.filter(d=>d.auction_id === $page.params.auction_id)}"
   search="true"
   sortable="true"
 />
-
