@@ -32,7 +32,7 @@ jobs:
           cp duckdb /usr/local/bin/duckdb
 
       - name: Download sqlite file
-        run: make sqlite-download
+        run: make download-db
 
       - uses: actions/setup-node@v3
         with:
