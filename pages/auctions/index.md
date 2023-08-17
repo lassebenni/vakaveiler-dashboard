@@ -84,7 +84,7 @@ select
     'https://vakantieveilingen.nl' || url as url,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
-    count(winning_bid) as total,
+    count(*) as total,
     min(inserted_at) as min_date,
     max(inserted_at) as max_date,
     max(md5(title)) as auction_id,
