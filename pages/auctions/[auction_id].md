@@ -12,6 +12,10 @@ select
 ```
 # Stats
 
+---
+
+Auction: <b><Value data={stats.filter(d=>d.auction_id === $page.params.auction_id)} column="title" /></b>
+
 Highest price: <b><Value data={stats.filter(d=>d.auction_id === $page.params.auction_id)} column="highest_price" /></b>
 
 Lowest price: <b><Value data={stats.filter(d=>d.auction_id === $page.params.auction_id)} column="lowest_price" /></b>
@@ -23,6 +27,8 @@ Most recent auction: <b><Value data={stats.filter(d=>d.auction_id === $page.para
 Total auctions: <b><Value data={stats.filter(d=>d.auction_id === $page.params.auction_id)} column="total" /></b>
 
 # Daily
+
+Highest and lowest winning bids per day.
 
 ```sql winning_bids
 select
@@ -39,8 +45,7 @@ select
 <LineChart
   data={winning_bids.filter(d=>d.auction_id === $page.params.auction_id)}
   x=day
-  y={["lowest_price", "highest_price", "total"]}
-  title={winning_bids.filter(d=>d.auction_id === $page.params.auction_id).title}
+  y={["lowest_price", "highest_price"]}
 />
 
 ```sql daily_bids
@@ -84,8 +89,7 @@ select
 <BarChart
   data={hourly_bids.filter(d=>d.auction_id === $page.params.auction_id)}
   x=hour
-  y={["lowest_price", "highest_price", "total"]}
-  title = {$page.params.auction_id}
+  y={["lowest_price", "highest_price"]}
 />
 
 <DataTable 
@@ -124,8 +128,7 @@ select
 <BarChart
   data={weekday_bids.filter(d=>d.auction_id === $page.params.auction_id)}
   x=weekday
-  y={["lowest_price", "highest_price", "total"]}
-  title = {weekday_bids}
+  y={["lowest_price", "highest_price"]}
 />
 
 <DataTable 
@@ -159,8 +162,7 @@ select
 <BarChart
   data={bidders.filter(d=>d.auction_id === $page.params.auction_id)}
   x=customer_name
-  y={["lowest_price", "highest_price", "total"]}
-  title = {$page.params.auction_id}
+  y={["lowest_price", "highest_price"]}
 />
 
 <DataTable 
