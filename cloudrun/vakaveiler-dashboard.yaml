@@ -1,0 +1,43 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/ingress-status: all
+    run.googleapis.com/operation-id: 343e28ab-f483-458f-a587-a047b4739a06
+  labels:
+    cloud.googleapis.com/location: europe-west3
+    run.googleapis.com/satisfiesPzs: 'true'
+  name: vakaveiler-dashboard
+  namespace: '189812413207'
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '100'
+        run.googleapis.com/client-name: gcloud
+        run.googleapis.com/client-version: 440.0.0
+      labels:
+        run.googleapis.com/startupProbeType: Default
+    spec:
+      containerConcurrency: 80
+      containers:
+      - image: eu.gcr.io/lasse-benninga-sndbx-y/vakaveiler-dashboard@sha256:660f8298fac69b8a0f2984764edbdfaf20a26615a47061c488caba319c36e9da
+        ports:
+        - containerPort: 80
+          name: http1
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 4Gi
+        startupProbe:
+          failureThreshold: 1
+          periodSeconds: 240
+          tcpSocket:
+            port: 80
+          timeoutSeconds: 240
+      serviceAccountName: 189812413207-compute@developer.gserviceaccount.com
+      timeoutSeconds: 300
+  traffic:
+  - latestRevision: true
+    percent: 100

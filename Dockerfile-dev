@@ -1,0 +1,20 @@
+FROM node:19
+ARG WORKSPACE_DIR=/app
+
+RUN apt-get update && \
+    apt-get install xdg-utils -y && \
+    npm install -g degit && \
+    mkdir -p ${WORKSPACE_DIR} && \
+    mkdir -p /evidence-bin
+
+WORKDIR ${WORKSPACE_DIR}
+
+COPY package.json package-lock.json ./
+COPY .evidence .evidence
+COPY pages pages
+COPY evidence.plugins.yaml evidence.plugins.yaml
+COPY auctions.duckdb auctions.duckdb
+
+RUN npm install
+
+ENTRYPOINT [ "npm", "run", "dev", "--", "--host", "0.0.0.0" ]
