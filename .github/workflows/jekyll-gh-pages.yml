@@ -26,10 +26,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
+      - uses: 'actions/checkout@v3'
+
+      - uses: "google-github-actions/auth@v1"
+        with:
+          workload_identity_provider: "projects/189812413207/locations/global/workloadIdentityPools/github/providers/github"
+          service_account: "vakantieveilingen@lasse-benninga-sndbx-y.iam.gserviceaccount.com"
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v1"
+
+      - name: Install duckdb to convert sqlite database to duckdb
+        run: |
+          wget https://github.com/duckdb/duckdb/releases/download/v0.8.1/duckdb_cli-linux-amd64.zip -O duckdb.zip
+          unzip duckdb.zip
+          cp duckdb /usr/local/bin/duckdb
+
+      - name: Download sqlite file from GCS and convert to duckdb
+        run: make download-db
+
       - uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -43,6 +58,8 @@ jobs:
       - name: Build evidence project
         run: mkdir _site && cp -r build _site
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
       # - name: Build with Jekyll
       #   uses: actions/jekyll-build-pages@v1
       #   with:
