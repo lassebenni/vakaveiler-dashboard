@@ -15,9 +15,12 @@ All auctions in the database. You can search for an auction by name. Click on au
 ```sql titles
 select
     title,
-    md5(title) as auction_id,
+    max('https://vakantieveilingen.nl' || url) as url,
     min(inserted_at) as min_date,
-    max(inserted_at) as max_date
+    max(inserted_at) as max_date,
+    min(winning_bid) as lowest_price,
+    max(winning_bid) as highest_price,
+    md5(title) as auction_id,
 from bids
 group by 1
 ```
@@ -26,7 +29,14 @@ group by 1
     data="{titles}"
     link="auction_id"
     search=true
-/>
+>
+    <Column id="title"/>
+    <Column id="lowest_price"/>
+    <Column id="highest_price"/>
+    <Column id="min_date"/>
+    <Column id="max_date"/>
+    <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
+</DataTable>
 
 # Cheapest auctions
 
