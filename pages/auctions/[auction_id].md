@@ -7,7 +7,7 @@ select
     max(day) as last_day,
     count(*) as total,
     max(md5(title)) as auction_id,
-    max('vakantieveilingen.nl' || url) as link
+    max('https://vakantieveilingen.nl' || url) as link
   from bids
   group by 1
 ```
@@ -15,19 +15,27 @@ select
 
 ---
 
-Auction: <b><Value data={stats.filter(d=>d.auction_id === $page.params.auction_id)} column="title" /></b>
+<script>
 
-Url: <Value data={stats.filter(d=>d.auction_id === $page.params.auction_id)} column="link" />
+let stats_filtered = stats.filter(d=>d.auction_id === $page.params.auction_id)
+let link = stats_filtered[0].link
 
-Highest price: <b><Value data={stats.filter(d=>d.auction_id === $page.params.auction_id)} column="highest_price" /></b>
+</script>
 
-Lowest price: <b><Value data={stats.filter(d=>d.auction_id === $page.params.auction_id)} column="lowest_price" /></b>
 
-First auction: <b><Value data={stats.filter(d=>d.auction_id === $page.params.auction_id)} column="first_day" /></b>
+Auction: <b><Value data={stats_filtered} column="title" /></b>
 
-Most recent auction: <b><Value data={stats.filter(d=>d.auction_id === $page.params.auction_id)} column="last_day" /></b>
+Url:  <b><a href="{link}">{link}</a><b>
 
-Total auctions: <b><Value data={stats.filter(d=>d.auction_id === $page.params.auction_id)} column="total" /></b>
+Highest price: <b><Value data={stats_filtered} column="highest_price" /></b>
+
+Lowest price: <b><Value data={stats_filtered} column="lowest_price" /></b>
+
+First auction: <b><Value data={stats_filtered} column="first_day" /></b>
+
+Most recent auction: <b><Value data={stats_filtered} column="last_day" /></b>
+
+Total auctions: <b><Value data={stats_filtered} column="total" /></b>
 
 # Daily
 
