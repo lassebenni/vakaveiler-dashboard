@@ -16,10 +16,8 @@ select
 ---
 
 <script>
-
 let stats_filtered = stats.filter(d=>d.auction_id === $page.params.auction_id)
-let link = stats_filtered[0].link
-
+let link = stats_filtered.length > 0 ? stats_filtered[0].link : ""
 </script>
 
 
