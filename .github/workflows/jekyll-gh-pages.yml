@@ -56,7 +56,7 @@ jobs:
         run: npm run build
 
       - name: Build evidence project
-        run: mkdir _site && cp -r build _site
+        run: mkdir _site && cp -r build/* _site
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
