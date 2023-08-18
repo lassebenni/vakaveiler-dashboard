@@ -41,7 +41,7 @@ jobs:
         run: npm run build
 
       - name: Build evidence project
-        run: mdkir _site && cp -r build _site
+        run: mkdir _site && cp -r build _site
 
       # - name: Build with Jekyll
       #   uses: actions/jekyll-build-pages@v1
