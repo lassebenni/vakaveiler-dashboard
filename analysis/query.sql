@@ -1,20 +1,23 @@
-INSTALL sqlite;
-LOAD sqlite;
-ATTACH 'analysis/veilingen.sqlite' AS veilingen (TYPE SQLITE);
+install sqlite
+;
+load sqlite
+;
+attach 'analysis/veilingen.sqlite' as veilingen(type sqlite)
+;
 
 CREATE TABLE bids AS (
 with 
 cleaned_auctions as 
 (
-  select
+select
   replace(data_lot_product_title, ':', '') as title,
-  cast(last_won_bid as int) as winning_bid,
+  try_cast(last_won_bid as int) as winning_bid,
   strptime(inserted_at, '%Y-%m-%d %H:%M:%S.%f') as inserted_at,
   date_trunc('day', strptime(inserted_at, '%Y-%m-%d %H:%M:%S.%f')) as day,
   data_lot_product_url as url,
   data_highestBid_bidder_lastName as last_name,
   data_highestBid_bidder_firstName as first_name,
-  data_highestBid_bidder_customerId as customer_id
+  data_highestBid_bidder_customerId as customer_id,
 from veilingen.auctions
 ),
 
@@ -46,7 +49,6 @@ filtered as (
 )
 
 select *
-from filtered
+from cleaned_auctions
 
 );
-
