@@ -267,7 +267,7 @@ Table for customer's that won this auction.
 
 ---
 
-# All auctions
+<!-- # All auctions
 
 ```sql all_bids
 select *, md5(title) as auction_id
@@ -280,4 +280,4 @@ Table for all auction data.
   data="{all_bids.filter(d=>d.auction_id === $page.params.auction_id)}"
   search="true"
   sortable="true"
-/>
+/> -->
