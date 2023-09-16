@@ -69,7 +69,6 @@ ORDER BY l.lowest_price ASC, frequency_of_lowest_price DESC, total DESC
 LIMIT 100
 ```
 
-
 <DataTable
   data="{cheapest}"
   search="true"
@@ -84,7 +83,6 @@ LIMIT 100
     <Column id="max_date"/>
     <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
 </DataTable>
-
 
 # Most Popular
 
@@ -105,8 +103,6 @@ select
 ```
 
 Top 100 auctions with the most winning bids. Some recurring auctions can be bid on mulitple times a day.
-
-
 
 <DataTable
   data="{top_popular_bids}"
@@ -166,7 +162,6 @@ select
     max(winning_bid) as highest_price,
     min(winning_bid) as lowest_price,
     min(inserted_at) as min_date,
-    min(inserted_at) as min_date,
     max(inserted_at) as max_date,
     max(md5(title)) as auction_id,
   from bids
@@ -189,3 +184,31 @@ select
     <Column id="max_date"/>
     <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
 </DataTable>
+
+# Biggest winners
+
+Top auction customers
+
+```sql top_customers
+select
+    last_name,
+    first_name,
+    customer_id,
+
+    count(*) as won,
+    max(winning_bid) as highest_price,
+    min(winning_bid) as lowest_price,
+    max(inserted_at) as latest,
+    min(inserted_at) as first,
+  from bids
+  where (customer_id is not null) and (customer_id not like 'None')
+  group by 1, 2, 3
+  having won > 50
+  order by won desc
+```
+
+<DataTable
+  data="{top_customers}"
+  search="true"
+  sortable="true"
+/>
