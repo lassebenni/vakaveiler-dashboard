@@ -35,6 +35,40 @@ Most recent auction: <b><Value data={stats_filtered} column="last_day" /></b>
 
 Total auctions: <b><Value data={stats_filtered} column="total" /></b>
 
+# Winning bids
+
+Winning bids count.
+
+
+
+```sql prices
+select
+    title,
+    winning_bid,
+    count(*) as total,
+    min(day) as first_day,
+    max(day) as last_day,
+    max(md5(title)) as auction_id
+  from bids
+  group by 1, 2
+  order by total desc
+```
+
+<BarChart
+  data={prices.filter(d=>d.auction_id === $page.params.auction_id)}
+  x=winning_bid
+  y=total
+/>
+
+<DataTable 
+  data="{prices.filter(d=>d.auction_id === $page.params.auction_id)}"
+>
+    <Column id="winning_bid"/>
+    <Column id="total"/>
+    <Column id="last_day"/>
+    <Column id="first_day"/>
+</DataTable>
+
 # Daily
 
 
@@ -265,19 +299,3 @@ Table for customer's that won this auction.
   sortable="true"
 />
 
----
-
-<!-- # All auctions
-
-```sql all_bids
-select *, md5(title) as auction_id
-from bids
-```
-
-Table for all auction data.
-
-<DataTable
-  data="{all_bids.filter(d=>d.auction_id === $page.params.auction_id)}"
-  search="true"
-  sortable="true"
-/> -->
