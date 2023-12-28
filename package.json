@@ -16,7 +16,7 @@
     "@evidence-dev/core-components": "^2.0.0",
     "@evidence-dev/preprocess": "3.1.2",
     "@evidence-dev/evidence": "^21.0.0",
-    "@evidence-dev/duckdb" :"0.2.0",
+    "@evidence-dev/duckdb" :"1.0.2",
     "@sveltejs/kit": "^1.13.0"
   },
   "overrides": {
