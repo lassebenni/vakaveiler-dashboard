@@ -20,3 +20,6 @@ analysis/veilingen.sqlite
 .evidence/template/build/favicon.ico
 .evidence/template/build/index.html
 build
+.venv
+.creds
+.vscode
