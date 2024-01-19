@@ -18,6 +18,8 @@ select
   data_highestBid_bidder_lastName as last_name,
   data_highestBid_bidder_firstName as first_name,
   data_highestBid_bidder_customerId as customer_id,
+  data_lot_product_keywords as keywords,
+  data_lot_product_supplier_name as supplier_name
 from veilingen.auctions
 ),
 
@@ -43,12 +45,14 @@ filtered as (
     url,
     last_name,
     first_name,
-    customer_id
+    customer_id,
+    keywords
   from cleaned_auctions
   inner join total_bids using (title)
 )
 
 select *
 from cleaned_auctions
-
+-- Only last 7 days
+where date_diff('day', inserted_at, now()::timestamp) <= 7
 );
