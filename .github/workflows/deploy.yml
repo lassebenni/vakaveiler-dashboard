@@ -1,7 +1,7 @@
 name: Deploy site to Netlify
 on:
-  schedule:
-    - cron: "30 8 * * *" # every evening at 11:30 PM
+  # schedule:
+    # - cron: "30 8 * * *" # every evening at 11:30 PM
   workflow_dispatch:
   push:
     branches:
