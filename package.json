@@ -18,7 +18,8 @@
     "@evidence-dev/csv": "^1.0.4",
     "@evidence-dev/duckdb": "^1.0.4",
     "@evidence-dev/evidence": "^25.0.0",
-    "@evidence-dev/postgres": "^1.0.2"
+    "@evidence-dev/postgres": "^1.0.2",
+    "duckdb-async": "^0.10.0"
   },
   "overrides": {
     "jsonwebtoken": "9.0.0",

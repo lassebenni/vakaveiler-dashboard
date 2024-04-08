@@ -7,7 +7,7 @@ select
     inserted_at,
     day,
     'https://vakantieveilingen.nl' || url as url
-from bids
+from staging_auctions
 ```
 
 All auctions in the database. You can search for an auction by name. Click on auction to go to the details page.
@@ -21,7 +21,7 @@ select
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     md5(title) as auction_id,
-from bids
+from staging_auctions
 group by 1
 ```
 
@@ -96,7 +96,7 @@ select
     min(inserted_at) as min_date,
     max(inserted_at) as max_date,
     max(md5(title)) as auction_id,
-  from bids
+  from staging_auctions
   group by title, url
   order by total desc
   limit 100
@@ -131,7 +131,7 @@ select
     min(inserted_at) as min_date,
     max(inserted_at) as max_date,
     max(md5(title)) as auction_id,
-  from bids
+  from staging_auctions
   group by title, url
   order by highest_price desc
   limit 100
@@ -164,7 +164,7 @@ select
     min(inserted_at) as min_date,
     max(inserted_at) as max_date,
     max(md5(title)) as auction_id,
-  from bids
+  from staging_auctions
   group by 1, 2
   order by spread desc
   limit 100
@@ -200,7 +200,7 @@ select
     min(winning_bid) as lowest_price,
     max(inserted_at) as latest,
     min(inserted_at) as first,
-  from bids
+  from staging_auctions
   where (customer_id is not null) and (customer_id not like 'None')
   group by 1, 2, 3
   having won > 50
@@ -225,7 +225,7 @@ select
     max(inserted_at) as latest,
     min(inserted_at) as first
 
-from bids
+from staging_auctions
 group by 1
 order by count desc
 ```

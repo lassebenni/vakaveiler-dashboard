@@ -24,15 +24,6 @@ jobs:
       - name: "Set up Cloud SDK"
         uses: "google-github-actions/setup-gcloud@v1"
 
-      - name: Install duckdb to convert sqlite database to duckdb
-        run: |
-          wget https://github.com/duckdb/duckdb/releases/download/v0.9.2/duckdb_cli-linux-amd64.zip -O duckdb.zip
-          unzip duckdb.zip
-          cp duckdb /usr/local/bin/duckdb
-
-      - name: Download sqlite file from GCS and convert to duckdb
-        run: make download-db
-
       - uses: actions/setup-node@v3
         with:
           node-version: 18

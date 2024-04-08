@@ -1,0 +1,7 @@
+# This file was automatically generated
+name: cloudsql
+type: postgres
+options:
+  host: 34.78.199.88
+  port: 5432
+  database: vakantieveilingen

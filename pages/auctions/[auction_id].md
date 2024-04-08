@@ -8,7 +8,7 @@ select
     count(*) as total,
     max(md5(title)) as auction_id,
     max('https://vakantieveilingen.nl' || url) as link
-  from bids
+  from staging_auctions
   group by 1
 ```
 # Stats
@@ -16,8 +16,8 @@ select
 ---
 
 <script>
-let stats_filtered = stats.filter(d=>d.auction_id === $page.params.auction_id)
-let link = stats_filtered.length > 0 ? stats_filtered[0].link : ""
+$: stats_filtered = stats.filter(d => d.auction_id === $page.params.auction_id);
+$: link = stats_filtered.length > 0 ? stats_filtered[0].link : ""
 </script>
 
 
@@ -49,7 +49,7 @@ select
     min(day) as first_day,
     max(day) as last_day,
     max(md5(title)) as auction_id
-  from bids
+  from staging_auctions
   group by 1, 2
   order by total desc
 ```
@@ -80,7 +80,7 @@ select
     max(winning_bid) as highest_price,
     count(winning_bid) as total,
     max(md5(title)) as auction_id,
-  from bids
+  from staging_auctions
   group by 1, 2
 ```
 
@@ -110,7 +110,7 @@ select
     count(*) as total,
     sum(count(*)) over (partition by title) as daily_bids,
     max(md5(title)) as auction_id,
-  from bids
+  from staging_auctions
   group by 1, 2
   order by day desc
 ```
@@ -130,13 +130,13 @@ Table for daily winners.
 ```sql hourly_bids
 select
     title,
-    extract('hour' FROM strptime(inserted_at, '%Y-%m-%d %H:%M:%S.%f')) as hour,
+    extract('hour' FROM inserted_at) as hour,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     count(*) as total,
     sum(count(*)) over (partition by title) as daily_bids,
     max(md5(title)) as auction_id,
-  from bids
+  from staging_auctions
   group by 1, 2
   order by hour asc
 ```
@@ -171,8 +171,8 @@ Table for hourly winners.
 ```sql minute_bids
 select
     title,
-    extract('hour' FROM strptime(inserted_at, '%Y-%m-%d %H:%M:%S.%f')) as hour,
-    extract('minute' FROM strptime(inserted_at, '%Y-%m-%d %H:%M:%S.%f')) as minute,
+    extract('hour' FROM inserted_at) as hour,
+    extract('minute' FROM inserted_at) as minute,
     concat(hour,minute) as hour_min,
     IF(hour between 0 and 6, 1, 0) as is_night,
     max(md5(title)) as auction_id,
@@ -180,7 +180,7 @@ select
     max(winning_bid) as highest_price,
     count(*) as total,
     sum(count(*)) over (partition by title) as daily_bids
-  from bids
+  from staging_auctions
   group by 1, 2, 3
   order by hour_min asc
 ```
@@ -215,8 +215,8 @@ Total bids per hour/minute of the day.
 ```sql weekday_bids
 select
     title,
-    extract('dayofweek' FROM strptime(inserted_at, '%Y-%m-%d %H:%M:%S.%f')) as day_nr,
-    CASE EXTRACT('dayofweek' FROM strptime(inserted_at, '%Y-%m-%d %H:%M:%S.%f'))
+    extract('dayofweek' FROM inserted_at) as day_nr,
+    CASE EXTRACT('dayofweek' FROM inserted_at)
         WHEN 0 THEN 'Sun.'
         WHEN 1 THEN 'Mon.'
         WHEN 2 THEN 'Tue.'
@@ -230,7 +230,7 @@ select
     count(*) as total,
     sum(count(*)) over (partition by title) as total_bids,
     max(md5(title)) as auction_id,
-  from bids
+  from staging_auctions
   group by 1, 2
   order by day_nr asc
 ```
@@ -278,7 +278,7 @@ select
     count(*) as total,
     sum(count(*)) over (partition by title) as daily_bids,
     max(md5(title)) as auction_id,
-  from bids
+  from staging_auctions
   group by title, customer_id, first_name, last_name
   order by total desc
 ```
