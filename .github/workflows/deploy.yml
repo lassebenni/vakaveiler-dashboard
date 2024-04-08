@@ -1,7 +1,7 @@
 name: Deploy site to Netlify
 on:
   # schedule:
-    # - cron: "30 8 * * *" # every evening at 11:30 PM
+  # - cron: "30 8 * * *" # every evening at 11:30 PM
   workflow_dispatch:
   push:
     branches:
@@ -11,11 +11,11 @@ jobs:
   deploy-to-netlify:
     runs-on: ubuntu-latest
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: "read"
+      id-token: "write"
 
     steps:
-      - uses: 'actions/checkout@v3'
+      - uses: "actions/checkout@v3"
       - id: "auth"
         uses: "google-github-actions/auth@v1"
         with:
@@ -31,13 +31,22 @@ jobs:
       - name: Install evidence dependencies
         run: npm install
 
+      - name: Generate sources
+        run: npm run sources
+        env:
+          EVIDENCE_SOURCE__cloudsql__host: ${{ secrets.CLOUDSQL_HOST }}
+          EVIDENCE_SOURCE__cloudsql__port: "5432"
+          EVIDENCE_SOURCE__cloudsql__database: "vakantieveilingen"
+          EVIDENCE_SOURCE__cloudsql__user: ${{ secrets.CLOUDSQL_USER }}
+          EVIDENCE_SOURCE__cloudsql__password: ${{ secrets.CLOUDSQL_PASSWORD }}
+
       - name: Build evidence project
         run: npm run build
 
       - name: Deploy evidence build to Netlify
         uses: nwtgck/actions-netlify@v2.1
         with:
-          publish-dir: './build'
+          publish-dir: "./build"
           production-branch: main
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deploy-message: "Deploy from GitHub Actions"
