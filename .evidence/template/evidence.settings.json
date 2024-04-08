@@ -1,1 +1,0 @@
-{"gitRepo":"git@github.com:lassebenni/vakantie-veilingen-scraper.git","database":"duckdb","credentials":{"filename":"auctions.duckdb","gitignoreDuckdb":false}}
