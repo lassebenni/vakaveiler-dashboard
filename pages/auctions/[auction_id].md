@@ -44,7 +44,7 @@ Winning bids count.
 ```sql prices
 select
     title,
-    winning_bid,
+    coalesce(winning_bid, 0) as winning_bid,
     count(*) as total,
     min(day) as first_day,
     max(day) as last_day,
@@ -61,7 +61,7 @@ select
 />
 
 <DataTable 
-  data="{prices.filter(d=>d.auction_id === $page.params.auction_id)}"
+  data={prices.filter(d=>d.auction_id === $page.params.auction_id)}
 >
     <Column id="winning_bid"/>
     <Column id="total"/>
@@ -164,51 +164,6 @@ Table for hourly winners.
   search="true"
   sortable="true"
 />
-
-<!-- 
-# Per minute
-
-```sql minute_bids
-select
-    title,
-    extract('hour' FROM inserted_at) as hour,
-    extract('minute' FROM inserted_at) as minute,
-    concat(hour,minute) as hour_min,
-    IF(hour between 0 and 6, 1, 0) as is_night,
-    max(md5(title)) as auction_id,
-    min(winning_bid) as lowest_price,
-    max(winning_bid) as highest_price,
-    count(*) as total,
-    sum(count(*)) over (partition by title) as daily_bids
-  from staging_auctions
-  group by 1, 2, 3
-  order by hour_min asc
-```
-
-Winners per hour/minute of the day.
-
-<LineChart
-  data={minute_bids.filter(d=>d.auction_id === $page.params.auction_id)}
-  x=hour_min
-  y={["lowest_price", "highest_price"]}
-/>
-
-Total bids per hour/minute of the day.
-
-<LineChart
-  data={minute_bids.filter(d=>d.auction_id === $page.params.auction_id)}
-  x=hour_min
-  y=total
-/>
-
-<DataTable 
-  data="{minute_bids.filter(d=>d.auction_id === $page.params.auction_id)}"
-  search="true"
-  sortable="true"
-/> -->
-
-
----
 
 # Weekdays
 

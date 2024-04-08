@@ -48,12 +48,6 @@ jobs:
 
       - name: Build evidence project
         run: npm run build
-        env:
-          EVIDENCE_SOURCE__cloudsql__host: 127.0.0.1
-          EVIDENCE_SOURCE__cloudsql__port: 5432
-          EVIDENCE_SOURCE__cloudsql__database: vakantieveilingen
-          EVIDENCE_SOURCE__cloudsql__user: ${{ secrets.CLOUDSQL_USER }}
-          EVIDENCE_SOURCE__cloudsql__password: ${{ secrets.CLOUDSQL_PASSWORD }}
 
       - name: Deploy evidence build to Netlify
         uses: nwtgck/actions-netlify@v2.1
