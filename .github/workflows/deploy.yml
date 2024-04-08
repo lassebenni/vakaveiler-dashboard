@@ -32,17 +32,17 @@ jobs:
       - name: Install evidence dependencies
         run: npm install
 
-      - uses: mattes/gce-cloudsql-proxy-action@v1
+      - uses: wagnerpereira/gce-cloudsql-proxy-action@v2
         with:
-          creds: ${{ secrets.SERVICE_ACCOUNT_KEY }}
           instance: ${{ secrets.CLOUDSQL_INSTANCE_CONNECTION_NAME }}
+
 
       - name: Generate sources
         run: npm run sources
         env:
-          EVIDENCE_SOURCE__cloudsql__host: ${{ secrets.CLOUDSQL_HOST }}
-          EVIDENCE_SOURCE__cloudsql__port: "5432"
-          EVIDENCE_SOURCE__cloudsql__database: "vakantieveilingen"
+          EVIDENCE_SOURCE__cloudsql__host: 127.0.0.1
+          EVIDENCE_SOURCE__cloudsql__port: 5432
+          EVIDENCE_SOURCE__cloudsql__database: vakantieveilingen
           EVIDENCE_SOURCE__cloudsql__user: ${{ secrets.CLOUDSQL_USER }}
           EVIDENCE_SOURCE__cloudsql__password: ${{ secrets.CLOUDSQL_PASSWORD }}
 
