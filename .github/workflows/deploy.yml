@@ -21,6 +21,7 @@ jobs:
         with:
           workload_identity_provider: "projects/189812413207/locations/global/workloadIdentityPools/github/providers/github"
           service_account: "vakantieveilingen@lasse-benninga-sndbx-y.iam.gserviceaccount.com"
+
       - name: "Set up Cloud SDK"
         uses: "google-github-actions/setup-gcloud@v1"
 
@@ -30,6 +31,11 @@ jobs:
 
       - name: Install evidence dependencies
         run: npm install
+
+      - uses: mattes/gce-cloudsql-proxy-action@v1
+        with:
+          creds: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+          instance: ${{ secrets.CLOUDSQL_INSTANCE_CONNECTION_NAME }}
 
       - name: Generate sources
         run: npm run sources
