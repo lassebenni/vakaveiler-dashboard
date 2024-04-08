@@ -1,23 +1,24 @@
 {
-  "name": "my-evidence-project",
+  "name": "vakantieveilingen",
   "version": "0.0.1",
   "scripts": {
     "build": "evidence build",
     "build:strict": "evidence build:strict",
     "dev": "evidence dev --open /",
-    "test": "evidence build"
+    "test": "evidence build",
+    "sources": "evidence sources"
   },
   "engines": {
     "npm": ">=7.0.0",
-    "node": ">=16.14.0"
+    "node": ">=18.0.0"
   },
   "type": "module",
   "dependencies": {
-    "@evidence-dev/core-components": "^2.0.0",
-    "@evidence-dev/preprocess": "3.1.2",
-    "@evidence-dev/evidence": "^21.0.0",
-    "@evidence-dev/duckdb" :"1.0.2",
-    "@sveltejs/kit": "^1.13.0"
+    "@evidence-dev/core-components": "^3.1.0",
+    "@evidence-dev/csv": "^1.0.4",
+    "@evidence-dev/duckdb": "^1.0.4",
+    "@evidence-dev/evidence": "^25.0.0",
+    "@evidence-dev/postgres": "^1.0.2"
   },
   "overrides": {
     "jsonwebtoken": "9.0.0",
