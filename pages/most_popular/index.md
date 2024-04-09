@@ -1,3 +1,25 @@
+# Auction count over time
+
+```sql auction_count
+select
+  date_trunc('day', inserted_at) as day,
+
+  count(*) as total_auctions
+from staging_auctions
+group by 1
+order by 1 asc
+```
+
+<LineChart 
+    data={auction_count}
+    y=total_auctions
+    x=day
+    xAxisTitle="Days" 
+    yAxisTitle="Total auctions" 
+/>
+
+---
+
 # Most Popular
 
 ```sql top_popular_bids

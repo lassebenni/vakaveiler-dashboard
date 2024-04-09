@@ -1,7 +1,7 @@
 # Vakantieveilingen.nl auctions tracker
+This website tracks the auctions won on https://vakantieveilingen.nl, a Dutch auction website.
 
-
-This website tracks the auctions won on https://vakantieveilingen.nl, a Dutch auction website. It is updated daily.
+It is updated daily.
 
 
 ```sql most_recent_bid
@@ -24,13 +24,10 @@ from staging_auctions
 ---
 
 
-### Detailed Auctions
 
-Click to go to the auctions page: [Auctions](auctions) to find more detailed information about the auctions such as the lowest and highest price, the total number of bids, and the total number of winners.
+### Auctions
 
----
-
-### Quickfind auctions
+Search and find auctions. Click on the title to see the details of the auction.
 
 ```sql titles
 select
@@ -59,3 +56,11 @@ group by 1
     <Column id="max_date"/>
     <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
 </DataTable>
+
+---
+
+### Navigation
+
+Use the tabs on the left to navigate between the different sections of the website.
+
+<img src="tabs.png" alt="drawing" width="200"/>
