@@ -30,9 +30,11 @@ total_bids as (
 
 filtered as (
   select
+    inserted_at,
     title,
     winning_bid,
-    inserted_at,
+    total_bids,
+    last_bid,
     day,
     url,
     winner_last_name,
@@ -45,4 +47,7 @@ filtered as (
 )
 
 
-select * from filtered
+select *
+from filtered
+-- Only 2024
+where inserted_at > cast('2024-01-01' as timestamp)
