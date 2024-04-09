@@ -1,6 +1,7 @@
 ```sql stats
 select
     title,
+
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     min(day) as first_day,
@@ -23,7 +24,7 @@ $: link = stats_filtered.length > 0 ? stats_filtered[0].link : ""
 
 Auction: <b><Value data={stats_filtered} column="title" /></b>
 
-Url:  <b><a href="{link}">{link}</a><b>
+Url:  <u><a href="{link}">{link}</a><u>
 
 Highest price: <b><Value data={stats_filtered} column="highest_price" /></b>
 
@@ -45,6 +46,7 @@ Winning bids count.
 select
     title,
     coalesce(winning_bid, 0) as winning_bid,
+
     count(*) as total,
     min(day) as first_day,
     max(day) as last_day,
@@ -76,6 +78,7 @@ select
 select
     title,
     day,
+
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     count(winning_bid) as total,
@@ -105,6 +108,7 @@ Total auctions per day.
 select
     title,
     day,
+
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     count(*) as total,
@@ -131,6 +135,7 @@ Table for daily winners.
 select
     title,
     extract('hour' FROM inserted_at) as hour,
+
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     count(*) as total,
@@ -171,6 +176,7 @@ Table for hourly winners.
 select
     title,
     extract('dayofweek' FROM inserted_at) as day_nr,
+
     CASE EXTRACT('dayofweek' FROM inserted_at)
         WHEN 0 THEN 'Sun.'
         WHEN 1 THEN 'Mon.'

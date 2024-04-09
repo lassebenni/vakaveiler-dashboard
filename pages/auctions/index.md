@@ -1,21 +1,14 @@
-# All Auctions
+# All auctions (unique titles)
 
-```sql bids
-select
-    title,
-    winning_bid,
-    inserted_at,
-    day,
-    'https://vakantieveilingen.nl' || url as url
-from staging_auctions
-```
+All unique auction titles in the database. You can search for an auction by name. Click on the auction title to go to the details page.
 
-All auctions in the database. You can search for an auction by name. Click on auction to go to the details page.
 
 ```sql titles
 select
     title,
-    first('https://vakantieveilingen.nl' || url) as url,
+
+    first('https://vakantieveilingen.nl/auctions' || url) as url,
+    count(*) as total,
     min(inserted_at) as min_date,
     max(inserted_at) as max_date,
     min(winning_bid) as lowest_price,
@@ -27,212 +20,14 @@ group by 1
 
 <DataTable
     data="{titles}"
-    link="auction_id"
-    search=true
+    search="true"
+    rows=20
 >
-    <Column id="title"/>
-    <Column id="auction_id"/>
-    <Column id="lowest_price"/>
-    <Column id="highest_price"/>
-    <Column id="min_date"/>
-    <Column id="max_date"/>
-    <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
-</DataTable>
-
-# Cheapest auctions
-
-Top 100 auctions with the lowest winning bid.
-
-```sql cheapest
-WITH lowest_price AS (
-  SELECT
-    title,
-    url,
-    min(winning_bid) AS lowest_price
-  FROM ${bids}
-  GROUP BY title, url
-)
-
-SELECT
-  l.title,
-  'https://vakantieveilingen.nl' || l.url AS url,
-  l.lowest_price,
-  max(B.winning_bid) AS highest_price,
-  count(B.winning_bid) AS total,
-  min(B.inserted_at) AS min_date,
-  max(B.inserted_at) AS max_date,
-  max(md5(l.title)) AS auction_id,
-  sum(CASE WHEN B.winning_bid = l.lowest_price THEN 1 ELSE 0 END) AS frequency_of_lowest_price
-FROM lowest_price l
-JOIN ${bids} B ON l.title = B.title AND l.url = B.url
-GROUP BY l.title, l.url, l.lowest_price
-ORDER BY l.lowest_price ASC, frequency_of_lowest_price DESC, total DESC
-LIMIT 100
-```
-
-<DataTable
-  data="{cheapest}"
-  search="true"
-  sortable="true"
-  link="auction_id"
->
-    <Column id="lowest_price"/>
-    <Column id="frequency_of_lowest_price" title="Frequency"/>
-    <Column id="title"/>
-    <Column id="highest_price"/>
-    <Column id="min_date"/>
-    <Column id="max_date"/>
-    <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
-</DataTable>
-
-# Most Popular
-
-```sql top_popular_bids
-select
-    title,
-    'https://vakantieveilingen.nl' || url as url,
-    min(winning_bid) as lowest_price,
-    max(winning_bid) as highest_price,
-    count(*) as total,
-    min(inserted_at) as min_date,
-    max(inserted_at) as max_date,
-    max(md5(title)) as auction_id,
-  from staging_auctions
-  group by title, url
-  order by total desc
-  limit 100
-```
-
-Top 100 auctions with the most winning bids. Some recurring auctions can be bid on mulitple times a day.
-
-<DataTable
-  data="{top_popular_bids}"
-  search="true"
-  sortable="true"
-  link="auction_id"
->
+    <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
     <Column id="total"/>
-    <Column id="title"/>
     <Column id="lowest_price"/>
     <Column id="highest_price"/>
     <Column id="min_date"/>
     <Column id="max_date"/>
     <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
 </DataTable>
-
-# Most expensive
-
-Top 100 auctions with the highest winning bids.
-
-```sql top_most_expensive
-select
-    title,
-    'https://vakantieveilingen.nl' || url as url,
-    max(winning_bid) as highest_price,
-    min(inserted_at) as min_date,
-    max(inserted_at) as max_date,
-    max(md5(title)) as auction_id,
-  from staging_auctions
-  group by title, url
-  order by highest_price desc
-  limit 100
-```
-
-<DataTable
-  data="{top_most_expensive}"
-  search="true"
-  sortable="true"
-  link="auction_id"
->
-  <Column id="highest_price"/>
-  <Column id="title"/>
-  <Column id="min_date"/>
-  <Column id="max_date"/>
-  <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
-</DataTable>
-
-# Largest spread
-
-Top 100 auctions with highest spread between winning bids. Spread is calculated by subtracting lowest winning bid price from highest price.
-
-```sql top_spread
-select
-    title,
-    'https://vakantieveilingen.nl' || url as url,
-    max(winning_bid) - min(winning_bid) as spread,
-    max(winning_bid) as highest_price,
-    min(winning_bid) as lowest_price,
-    min(inserted_at) as min_date,
-    max(inserted_at) as max_date,
-    max(md5(title)) as auction_id,
-  from staging_auctions
-  group by 1, 2
-  order by spread desc
-  limit 100
-```
-
-<DataTable
-  data="{top_spread}"
-  search="true"
-  sortable="true"
-  link="auction_id"
->
-    <Column id="spread"/>
-    <Column id="title"/>
-    <Column id="lowest_price"/>
-    <Column id="highest_price"/>
-    <Column id="min_date"/>
-    <Column id="max_date"/>
-    <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
-</DataTable>
-
-# Biggest winners
-
-Top auction customers
-
-```sql top_customers
-select
-    last_name,
-    first_name,
-    customer_id,
-
-    count(*) as won,
-    max(winning_bid) as highest_price,
-    min(winning_bid) as lowest_price,
-    max(inserted_at) as latest,
-    min(inserted_at) as first,
-  from staging_auctions
-  where (customer_id is not null) and (customer_id not like 'None')
-  group by 1, 2, 3
-  having won > 50
-  order by won desc
-```
-
-<DataTable
-  data="{top_customers}"
-  search="true"
-  sortable="true"
-/>
-
-# Top suppliers
-
-```sql top_suppliers
-select
-    supplier_name,
-
-    count(*) as count,
-    max(winning_bid) as highest_price,
-    min(winning_bid) as lowest_price,
-    max(inserted_at) as latest,
-    min(inserted_at) as first
-
-from staging_auctions
-group by 1
-order by count desc
-```
-
-<DataTable
-  data="{top_suppliers}"
-  search="true"
-  sortable="true"
-/>
