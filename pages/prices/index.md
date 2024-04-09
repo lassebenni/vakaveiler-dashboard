@@ -1,8 +1,3 @@
----
-queries:
-  - bids.sql
----
-
 # Cheapest auctions
 
 Top 100 auctions with the lowest winning bid.
@@ -12,16 +7,17 @@ WITH lowest_price AS (
   SELECT
     title,
     url,
+
     min(winning_bid) AS lowest_price
-  FROM ${bids}
-  GROUP BY title, url
+  FROM staging_auctions
+  GROUP BY 1, 2
 )
 
 SELECT
   l.title,
-  'https://vakantieveilingen.nl' || l.url AS url,
   l.lowest_price,
 
+  first(l.url) as url,
   max(B.winning_bid) AS highest_price,
   count(B.winning_bid) AS total,
   min(B.inserted_at) AS min_date,
@@ -29,8 +25,8 @@ SELECT
   max('/auctions/' || md5(l.title)) as auction_id,
   sum(CASE WHEN B.winning_bid = l.lowest_price THEN 1 ELSE 0 END) AS frequency_of_lowest_price
 FROM lowest_price l
-JOIN ${bids} B ON l.title = B.title AND l.url = B.url
-GROUP BY 1, 2, 3
+JOIN staging_auctions B ON l.title = B.title AND l.url = B.url
+GROUP BY 1, 2
 ORDER BY l.lowest_price ASC, frequency_of_lowest_price DESC, total DESC
 LIMIT 100
 ```
@@ -42,7 +38,8 @@ LIMIT 100
   rows=20
 >
     <Column id="lowest_price"/>
-    <Column id="frequency_of_lowest_price" title="Frequency"/>
+    <Column id="frequency_of_lowest_price" title="Lowest"/>
+    <Column id="total"/>
     <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
     <Column id="highest_price"/>
     <Column id="min_date"/>
@@ -59,6 +56,7 @@ select
     title,
     'https://vakantieveilingen.nl' || url as url,
 
+    count(*) as total,
     max(winning_bid) as highest_price,
     min(inserted_at) as min_date,
     max(inserted_at) as max_date,
@@ -76,7 +74,8 @@ select
   rows=20
 >
   <Column id="highest_price"/>
-
+  <Column id="total"/>
+  <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
   <Column id="min_date"/>
   <Column id="max_date"/>
   <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
@@ -91,6 +90,7 @@ select
     title,
     'https://vakantieveilingen.nl' || url as url,
 
+    count(*) as total,
     max(winning_bid) - min(winning_bid) as spread,
     max(winning_bid) as highest_price,
     min(winning_bid) as lowest_price,
@@ -110,10 +110,11 @@ select
   rows=20
 >
     <Column id="spread"/>
+    <Column id="total"/>
     <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
     <Column id="lowest_price"/>
     <Column id="highest_price"/>
     <Column id="min_date"/>
     <Column id="max_date"/>
-    <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
+    <Column id="url" contentType="link" linkLabel="" openInNewTab="true"/>
 </DataTable>
