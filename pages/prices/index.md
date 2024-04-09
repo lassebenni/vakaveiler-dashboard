@@ -72,7 +72,7 @@ SELECT
   max_date,
   auction_id,
   frequency_of_highest_price,
-  url
+  'https://vakantieveilingen.nl' || url as url,
 FROM ${prices}
   order by highest_price desc
   limit 100
