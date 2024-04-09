@@ -26,27 +26,3 @@ select
   sortable="true"
   rows=20
 />
-
-# All winning bids
-
-All individual winning bids in the database.
-
-<Alert status="warning">
-Warning: This is a lot of information, it can be slow to search.
-</Alert>
-
-
-```sql all_winning_bids
-select
-    *,
-    'auctions/' || md5(title) as auction_id,
-    cast(datepart('year', inserted_at) as text) as year
-from staging_auctions
-```
-
-<DataTable
-    data="{all_winning_bids}"
-    search="true"
-    sortable="true"
-    rows=20
-/>
