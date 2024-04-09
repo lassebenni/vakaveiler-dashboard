@@ -2,8 +2,7 @@
 
 Top 100 auctions with the lowest winning bid.
 
-```sql cheapest
-WITH lowest_price AS (
+```sql lowest_prices
   SELECT
     title,
     url,
@@ -11,20 +10,20 @@ WITH lowest_price AS (
     min(winning_bid) AS lowest_price
   FROM staging_auctions
   GROUP BY 1, 2
-)
+```
 
+```sql cheapest
 SELECT
   l.title,
   l.lowest_price,
 
-  first(l.url) as url,
   max(B.winning_bid) AS highest_price,
   count(B.winning_bid) AS total,
   min(B.inserted_at) AS min_date,
   max(B.inserted_at) AS max_date,
   max('/auctions/' || md5(l.title)) as auction_id,
   sum(CASE WHEN B.winning_bid = l.lowest_price THEN 1 ELSE 0 END) AS frequency_of_lowest_price
-FROM lowest_price l
+FROM lowest_prices l
 JOIN staging_auctions B ON l.title = B.title AND l.url = B.url
 GROUP BY 1, 2
 ORDER BY l.lowest_price ASC, frequency_of_lowest_price DESC, total DESC
@@ -44,7 +43,6 @@ LIMIT 100
     <Column id="highest_price"/>
     <Column id="min_date"/>
     <Column id="max_date"/>
-    <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
 </DataTable>
 
 # Most expensive
@@ -116,5 +114,5 @@ select
     <Column id="highest_price"/>
     <Column id="min_date"/>
     <Column id="max_date"/>
-    <Column id="url" contentType="link" linkLabel="" openInNewTab="true"/>
+    <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
 </DataTable>
