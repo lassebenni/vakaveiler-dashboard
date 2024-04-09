@@ -228,10 +228,11 @@ Weekday winners table.
 ```sql bidders
 select
     title,
-    customer_id,
-    first_name,
-    last_name,
-    case when first_name is null then 'Unknown' else concat(first_name,' ', last_name) end as customer_name,
+    winner_customer_id,
+    winner_first_name,
+    winner_last_name,
+    case when winner_first_name is null then 'Unknown' else concat(winner_first_name,' ', winner_last_name) end as winner_customer_name,
+
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     min(day) as first_day,
@@ -240,7 +241,7 @@ select
     sum(count(*)) over (partition by title) as daily_bids,
     max(md5(title)) as auction_id,
   from staging_auctions
-  group by title, customer_id, first_name, last_name
+  group by 1, 2, 3, 4
   order by total desc
 ```
 
@@ -248,7 +249,7 @@ Total number of won auctions per customer.
 
 <BarChart
   data={bidders.filter(d=>d.auction_id === $page.params.auction_id)}
-  x="customer_name"
+  x="winner_customer_name"
   y="total"
 />
 

@@ -36,24 +36,22 @@ Click to go to the auctions page: [Auctions](auctions) to find more detailed inf
 select
     title,
 
-    first('https://vakantieveilingen.nl/auctions' || url) as url,
+    first('https://vakantieveilingen.nl/' || url) as url,
     count(*) as total,
     min(inserted_at) as min_date,
     max(inserted_at) as max_date,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
-    'auctions/' || md5(title) as auction_id,
+    '/auctions/' || md5(title) as auction_id,
 from staging_auctions
 group by 1
 ```
 
 <DataTable
     data="{titles}"
-    link="auction_id"
     search="true"
 >
-    <Column id="title"/>
-    <Column id="auction_id"/>
+    <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
     <Column id="total"/>
     <Column id="lowest_price"/>
     <Column id="highest_price"/>

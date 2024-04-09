@@ -7,7 +7,7 @@ All unique auction titles in the database. You can search for an auction by name
 select
     title,
 
-    first('https://vakantieveilingen.nl/auctions' || url) as url,
+    first('https://vakantieveilingen' || url) as url,
     count(*) as total,
     min(inserted_at) as min_date,
     max(inserted_at) as max_date,

@@ -9,9 +9,9 @@ SELECT
   date(inserted_at) as day,
 
   data_lot_product_url AS url,
-  "data_highestBid_bidder_lastName" AS last_name,
-  "data_highestBid_bidder_firstName" AS first_name,
-  "data_highestBid_bidder_customerId" AS customer_id,
+  "data_highestBid_bidder_lastName" AS winner_last_name,
+  "data_highestBid_bidder_firstName" AS winner_first_name,
+  "data_highestBid_bidder_customerId" AS winner_customer_id,
   "data_lot_product_keywords" AS keywords,
   "data_lot_product_supplier_name" AS supplier_name
 FROM
@@ -35,10 +35,10 @@ filtered as (
     inserted_at,
     day,
     url,
-    last_name,
-    first_name,
+    winner_last_name,
+    winner_first_name,
+    winner_customer_id,
     supplier_name,
-    customer_id,
     keywords
   from cleaned_auctions
   inner join total_bids using (title)
