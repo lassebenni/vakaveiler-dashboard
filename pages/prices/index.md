@@ -150,6 +150,7 @@ from staging_auctions
 group by 1
 order by 1 asc
 ```
+
 <LineChart 
     data={prices_daily} 
     y={["median_winning_bid", "avg_winning_bid"]}
@@ -157,7 +158,6 @@ order by 1 asc
     xAxisTitle="Days" 
     yAxisTitle="Median Winning Bid" 
 >
-    <ReferenceLine data="{prices_daily}" y="max" label="name" />
 </LineChart>
 
 ```sql prices_monthly
