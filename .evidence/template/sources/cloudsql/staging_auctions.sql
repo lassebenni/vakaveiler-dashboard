@@ -1,4 +1,9 @@
-with 
+with deduped as (
+    select
+      distinct on("data_lot_product_title", "data_lot_tsEmbargo") *
+    from auctions.auctions
+    order by "data_lot_product_title", "data_lot_tsEmbargo", inserted_at desc
+),
 cleaned_auctions as 
 (
 SELECT
@@ -15,7 +20,7 @@ SELECT
   "data_lot_product_keywords" AS keywords,
   "data_lot_product_supplier_name" AS supplier_name
 FROM
-  auctions.auctions
+  deduped
 ),
 
 total_bids as (
