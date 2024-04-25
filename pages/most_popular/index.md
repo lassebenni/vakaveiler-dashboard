@@ -25,7 +25,7 @@ order by 1 asc
 ```sql top_popular_bids
 select
     title,
-    'https://vakantieveilingen.nl' || url as url,
+    url as url,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     count(*) as total,
@@ -52,5 +52,5 @@ Top 100 auctions with the most winning bids. Some recurring auctions can be bid 
     <Column id="highest_price"/>
     <Column id="min_date"/>
     <Column id="max_date"/>
-    <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
+    <Column id="url"/>
 </DataTable>
