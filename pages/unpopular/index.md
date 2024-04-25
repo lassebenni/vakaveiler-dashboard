@@ -6,7 +6,7 @@ select
     expires_at,
 
     count(*) as unsold
-from auctions_s
+from auctions_dupes
 where is_running = False
 and highest_bid = 0
 group by 1, 2
@@ -81,7 +81,7 @@ Unsold over time
 select
     date_trunc('day', inserted_at) as day,
     count(*) as unsold
-from auctions_s
+from auctions_dupes
 where is_running = False
 and highest_bid = 0
 group by 1
