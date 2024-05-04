@@ -4,6 +4,7 @@ select
 
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
+    median(winning_bid) as median_price,
     min(day) as first_day,
     max(day) as last_day,
     count(*) as total,
@@ -27,6 +28,8 @@ Auction: <b><Value data={stats_filtered} column="title" /></b>
 Url:  <u><a href="{link}">{link}</a><u>
 
 Highest price: <b><Value data={stats_filtered} column="highest_price" /></b>
+
+Median price: <b><Value data={stats_filtered} column="median_price" /></b>
 
 Lowest price: <b><Value data={stats_filtered} column="lowest_price" /></b>
 
@@ -81,6 +84,7 @@ select
 
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
+    median(winning_bid) as median_price,
     count(winning_bid) as total,
     max(md5(title)) as auction_id,
   from staging_auctions
@@ -92,7 +96,7 @@ Highest and lowest winning bids per day.
 <LineChart
   data={winning_bids.filter(d=>d.auction_id === $page.params.auction_id)}
   x=day
-  y={["lowest_price", "highest_price"]}
+  y={["lowest_price", "median_price", "highest_price"]}
 />
 
 Total auctions per day.
@@ -138,6 +142,7 @@ select
 
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
+    median(winning_bid) as median_price,
     count(*) as total,
     sum(count(*)) over (partition by title) as daily_bids,
     max(md5(title)) as auction_id,
@@ -151,12 +156,12 @@ Winners per hour of the day.
 <BarChart
   data={hourly_bids.filter(d=>d.auction_id === $page.params.auction_id)}
   x=hour
-  y={["lowest_price", "highest_price"]}
+  y={["lowest_price", "median_price", "highest_price"]}
 />
 
 Total auctions per hour of the day.
 
-<BarChart
+<LineChart
   data={hourly_bids.filter(d=>d.auction_id === $page.params.auction_id)}
   x=hour
   y=total
@@ -188,6 +193,7 @@ select
      END AS weekday,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
+    median(winning_bid) as median_price,
     count(*) as total,
     sum(count(*)) over (partition by title) as total_bids,
     max(md5(title)) as auction_id,
@@ -201,16 +207,18 @@ Winners on each day of the week.
 <BarChart
   data={weekday_bids.filter(d=>d.auction_id === $page.params.auction_id)}
   x=weekday
-  y={["lowest_price", "highest_price"]}
+  y={["lowest_price", "median_price", "highest_price"]}
   type=grouped
+  sort=false
 />
 
 Total auctions on each day of the week.
 
-<BarChart
+<LineChart
   data={weekday_bids.filter(d=>d.auction_id === $page.params.auction_id)}
   x=weekday
   y=total
+  sort=false
 />
 
 Weekday winners table.
@@ -235,6 +243,7 @@ select
 
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
+    median(winning_bid) as median_price,
     min(day) as first_day,
     max(day) as last_day,
     count(*) as total,
