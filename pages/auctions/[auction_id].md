@@ -93,7 +93,7 @@ select
 
 Highest and lowest winning bids per day.
 
-<LineChart
+<BarChart
   data={winning_bids.filter(d=>d.auction_id === $page.params.auction_id)}
   x=day
   y={["lowest_price", "median_price", "highest_price"]}
