@@ -2,6 +2,7 @@
 select
     title,
 
+    first(retail_price) as retail_price,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     median(winning_bid) as median_price,
@@ -27,11 +28,13 @@ Auction: <b><Value data={stats_filtered} column="title" /></b>
 
 Url:  <u><a href="{link}">{link}</a><u>
 
-Highest price: <b><Value data={stats_filtered} column="highest_price" /></b>
+Retail price: <b><Value data={stats_filtered} column="retail_price" /></b>
 
-Median price: <b><Value data={stats_filtered} column="median_price" /></b>
+Highest bid: <b><Value data={stats_filtered} column="highest_price" /></b>
 
-Lowest price: <b><Value data={stats_filtered} column="lowest_price" /></b>
+Median bid: <b><Value data={stats_filtered} column="median_price" /></b>
+
+Lowest bid: <b><Value data={stats_filtered} column="lowest_price" /></b>
 
 First auction: <b><Value data={stats_filtered} column="first_day" /></b>
 
@@ -270,3 +273,59 @@ Table for customer's that won this auction.
   sortable="true"
 />
 
+# Price distribution over time
+
+```sql price_distribution
+select
+  date_trunc('day', inserted_at) as day,
+
+  count(*) as total_auctions,
+  avg(winning_bid) as avg_winning_bid,
+  median(winning_bid) as median_winning_bid,
+  min(winning_bid) as min,
+  max(winning_bid) as max,
+from staging_auctions
+where md5(title) = '${params.auction_id}'
+group by 1
+order by 1 asc
+```
+
+<LineChart 
+    data={price_distribution}
+    y={["median_winning_bid", "avg_winning_bid"]}
+    x=day
+    xAxisTitle="Days"
+    yAxisTitle="Median Winning Bid"
+>
+</LineChart>
+
+
+```sql prices_daily
+select
+  date_trunc('month', inserted_at) as month,
+  monthname(inserted_at) as month_name,
+
+  count(*) as total_auctions,
+  median(winning_bid) as median_winning_bid,
+  min(winning_bid) as min,
+  max(winning_bid) as max,
+  stddev_pop(winning_bid) as std_dev,
+  percentile_cont(0.25) within group (order by winning_bid) as q1,
+  percentile_cont(0.75) within group (order by winning_bid) as q3,
+  percentile_cont(0.05) within group (order by winning_bid) as q5,
+  percentile_cont(0.95) within group (order by winning_bid) as q95,
+from staging_auctions
+where md5(title) = '${params.auction_id}'
+group by 1, 2
+order by 1 asc
+```
+
+<BoxPlot
+    data={prices_daily}
+    name=month_name
+    midpoint=median_winning_bid
+    min=min
+    max=max
+    intervalBottom=q5
+    intervalTop=q95
+/>
