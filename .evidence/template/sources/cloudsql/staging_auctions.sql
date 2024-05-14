@@ -22,7 +22,7 @@ SELECT
   "data_lot_product_supplier_name" AS supplier_name,
   "data_lot_tsExpires" AS expires_at,
   "data_isRunning" AS is_running,
-  cast("data_lot_product_retailPrice" as double) AS retail_price
+  cast("data_lot_product_retailPrice" as float) AS retail_price
 
 FROM
   deduped
