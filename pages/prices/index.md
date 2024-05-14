@@ -2,7 +2,7 @@
 
 Several price analysis of auctions can be found here.
 
-``` prices
+```sql prices
 SELECT
   l.title,
   l.url,
