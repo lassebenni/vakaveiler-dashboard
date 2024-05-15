@@ -95,45 +95,6 @@ FROM ${prices}
 
 ---
 
-# Highest Retail Prices
-
-Top 100 auctions with the highest retail prices.
-
-```sql retail_prices
-select
-    title,
-    'https://vakantieveilingen.nl' || url as url,
-
-    first(retail_price) as retail_price,
-    count(*) as total_auctions,
-    max(winning_bid) as highest_bid,
-    min(winning_bid) as lowest_bid,
-    min(inserted_at) as min_date,
-    max(inserted_at) as max_date,
-    max('/auctions/' || md5(title)) as auction_id,
-  from staging_auctions
-  group by 1, 2
-  order by retail_price desc
-  limit 100
-```
-
-<DataTable
-  data="{retail_prices}"
-  search="true"
-  sortable="true"
-  rows=20
->
-    <Column id="retail_price"/>
-    <Column id="highest_bid"/>
-    <Column id="lowest_bid"/>
-    <Column id="total_auctions"/>
-    <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
-    <Column id="min_date"/>
-    <Column id="max_date"/>
-    <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
-</DataTable>
----
-
 # Largest Bid spread
 
 Top 100 auctions with highest spread between winning bids. Spread is calculated by subtracting lowest winning bid price from highest price.
