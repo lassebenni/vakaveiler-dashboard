@@ -1,22 +1,39 @@
+```sql unsold
+select
+    title,
+
+    count(*) as unsold
+from staging_auctions
+where highest_bid = 0
+and md5(title) = '${params.auction_id}'
+group by 1
+order by unsold desc
+```
+
 ```sql stats
 select
     title,
 
+    count(*) as sold,
+    first(unsold) as unsold,
     first(retail_price) as retail_price,
+    first(unsold) + count(*) as total,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     median(winning_bid) as median_price,
     min(day) as first_day,
     max(day) as last_day,
-    count(*) as total,
     max(md5(title)) as auction_id,
     max('https://vakantieveilingen.nl' || url) as link
-  from staging_auctions
-  group by 1
+from staging_auctions
+left join ${unsold} using (title)
+where highest_bid > 0
+and md5(title) = '${params.auction_id}'
+group by 1
+order by unsold desc
 ```
-# Stats
 
----
+# Stats
 
 <script>
 $: stats_filtered = stats.filter(d => d.auction_id === $page.params.auction_id);
@@ -28,6 +45,13 @@ Auction: <b><Value data={stats_filtered} column="title" /></b>
 
 Url:  <u><a href="{link}">{link}</a><u>
 
+Total: <b><Value data={stats_filtered} column="total" /></b>
+
+Sold: <b><Value data={stats_filtered} column="sold" /></b>
+
+Unsold: <b><Value data={stats_filtered} column="unsold" /></b>
+
+
 Retail price: <b><Value data={stats_filtered} column="retail_price" /></b>
 
 Highest bid: <b><Value data={stats_filtered} column="highest_price" /></b>
@@ -36,11 +60,10 @@ Median bid: <b><Value data={stats_filtered} column="median_price" /></b>
 
 Lowest bid: <b><Value data={stats_filtered} column="lowest_price" /></b>
 
-First auction: <b><Value data={stats_filtered} column="first_day" /></b>
+First seen: <b><Value data={stats_filtered} column="first_day" /></b>
 
-Most recent auction: <b><Value data={stats_filtered} column="last_day" /></b>
+Last seen: <b><Value data={stats_filtered} column="last_day" /></b>
 
-Total auctions: <b><Value data={stats_filtered} column="total" /></b>
 
 # Winning bids
 
@@ -58,6 +81,8 @@ select
     max(day) as last_day,
     max(md5(title)) as auction_id
   from staging_auctions
+  where highest_bid > 0
+  and md5(title) = '${params.auction_id}'
   group by 1, 2
   order by total desc
 ```
@@ -91,6 +116,8 @@ select
     count(winning_bid) as total,
     max(md5(title)) as auction_id,
   from staging_auctions
+  where highest_bid > 0
+  and md5(title) = '${params.auction_id}'
   group by 1, 2
 ```
 
@@ -122,6 +149,8 @@ select
     sum(count(*)) over (partition by title) as daily_bids,
     max(md5(title)) as auction_id,
   from staging_auctions
+  where highest_bid > 0
+  and md5(title) = '${params.auction_id}'
   group by 1, 2
   order by day desc
 ```
@@ -150,6 +179,8 @@ select
     sum(count(*)) over (partition by title) as daily_bids,
     max(md5(title)) as auction_id,
   from staging_auctions
+  where highest_bid > 0
+  and md5(title) = '${params.auction_id}'
   group by 1, 2
   order by hour asc
 ```
@@ -201,6 +232,8 @@ select
     sum(count(*)) over (partition by title) as total_bids,
     max(md5(title)) as auction_id,
   from staging_auctions
+  where highest_bid > 0
+  and md5(title) = '${params.auction_id}'
   group by 1, 2
   order by day_nr asc
 ```
@@ -253,6 +286,8 @@ select
     sum(count(*)) over (partition by title) as daily_bids,
     max(md5(title)) as auction_id,
   from staging_auctions
+  where highest_bid > 0
+  and md5(title) = '${params.auction_id}'
   group by 1, 2, 3, 4
   order by total desc
 ```
@@ -328,4 +363,30 @@ order by 1 asc
     max=max
     intervalBottom=q5
     intervalTop=q95
+/>
+
+
+---
+# Unsold over time
+
+Total number of unsold auctions over time
+
+```sql unsold_over_time
+select
+    date_trunc('day', inserted_at) as day,
+
+    count(*) as unsold
+from staging_auctions
+where highest_bid = 0
+and md5(title) = '${params.auction_id}'
+group by 1
+```
+
+
+<LineChart 
+    data={unsold_over_time}
+    y=unsold
+    x=day
+    xAxisTitle="Days" 
+    yAxisTitle="Unsold" 
 />
