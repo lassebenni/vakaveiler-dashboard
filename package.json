@@ -11,14 +11,13 @@
   },
   "engines": {
     "npm": ">=7.0.0",
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "type": "module",
   "dependencies": {
-    "@evidence-dev/core-components": "^4.1.1",
-    "@evidence-dev/csv": "^1.0.4",
+    "@evidence-dev/core-components": "^4.2.0",
     "@evidence-dev/duckdb": "^1.0.4",
-    "@evidence-dev/evidence": "^34.0.1",
+    "@evidence-dev/evidence": "^35.0.0",
     "@evidence-dev/postgres": "^1.0.2",
     "duckdb-async": "^0.10.0"
   },
