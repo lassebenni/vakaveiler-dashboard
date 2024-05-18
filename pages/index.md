@@ -64,12 +64,12 @@ select
 from staging_auctions
 where winning_bid > 0
 group by 1
-limit 100
 ```
 
 <DataTable
     data="{titles}"
     search="true"
+    rows=20
 >
     <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
     <Column id="total"/>

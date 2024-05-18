@@ -1,3 +1,9 @@
+---
+queries:
+  - sold_unsold: sold_unsold.sql
+  - unsold: unsold.sql
+---
+
 # Daily top 3 (last week)
 
 ```sql daily_auctions
@@ -9,7 +15,7 @@ select
   count(*) as total
 
 from staging_auctions
-where highest_bid > 0
+where highest_price > 0
 group by 1, 2
 order by 1 asc, 3 asc
 ```
@@ -55,7 +61,7 @@ select
   count(*) as total
 
 from staging_auctions
-where highest_bid > 0
+where highest_price > 0
 group by 1, 2, 3
 ```
 
@@ -105,7 +111,7 @@ select
   row_number() OVER (PARTITION BY year, month ORDER BY count(*) DESC) as rank
 
 from staging_auctions
-where highest_bid > 0
+where highest_price > 0
 group by 1, 2, 3
 ```
 
@@ -156,7 +162,7 @@ select
     max(inserted_at) as max_date,
     max('/auctions/' || md5(title)) as auction_id,
   from staging_auctions
-  where highest_bid > 0
+  where highest_price > 0
   group by title, url
   order by total desc
   limit 100
@@ -183,46 +189,18 @@ Top 100 auctions with the most winning bids. Some recurring auctions can be bid 
 
 Auctions that have more unsold than sold items
 
-```sql unsold
+```sql more_unsold
 select
-    title,
-
-    count(*) as unsold
-from auctions_dupes
-where highest_bid = 0
-group by 1
-having unsold > 1
-order by unsold desc
-```
-
-```sql unsold_sold
-select
-    title,
-    unsold,
-
-    count(*) as sold,
-    greatest(date_diff('day', min(inserted_at), max(inserted_at)), 1) as days_active,
-    min(inserted_at) as first_seen,
-    max(inserted_at) as last_seen,
-    first(retail_price) as retail_price,
-    max(winning_bid) as highest_bid,
-    min(winning_bid) as lowest_bid,
-    max(url) as url,
-    '/auctions/' || md5(title) as auction_id,
-
-from staging_auctions
-inner join ${unsold} using (title)
-where highest_bid > 0
-group by 1, 2
-having unsold > sold
-order by 2 desc
-limit 100
+    *,
+    last_seen - first_seen as days_active
+from ${sold_unsold}
+where unsold > sold
 ```
 
 ---
 
 <DataTable
-    data="{unsold_sold}"
+    data="{more_unsold}"
     search="true"
     rows=20
 >
@@ -231,8 +209,8 @@ limit 100
     <Column id="sold"/>
     <Column id="days_active"/>
     <Column id="retail_price"/>
-    <Column id="lowest_bid"/>
-    <Column id="highest_bid"/>
+    <Column id="lowest_price"/>
+    <Column id="highest_price"/>
     <Column id="first_seen"/>
     <Column id="last_seen"/>
     <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
@@ -244,16 +222,14 @@ Total number of unsold auctions over time
 
 ```sql unsold_over_time
 select
-    date_trunc('day', inserted_at) as day,
-    count(*) as unsold
-from auctions_dupes
-where highest_bid = 0
-group by 1
-having unsold > 1
+    day,
+    unsold
+from ${unsold}
+where unsold > 1
 ```
 
 
-<LineChart 
+<BarChart
     data={unsold_over_time}
     y=unsold
     x=day
@@ -263,73 +239,3 @@ having unsold > 1
 
 ---
 
-
-# Shortest running
-
-Auctions that have only been active for one day
-
-```sql shortest
-select
-    title,
-
-    first(unsold) as unsold,
-    count(*) as sold,
-    greatest(date_diff('day', min(inserted_at), max(inserted_at)), 1) as days_active,
-    min(inserted_at) as first_seen,
-    max(inserted_at) as last_seen,
-    first(retail_price) as retail_price,
-    max(winning_bid) as highest_bid,
-    min(winning_bid) as lowest_bid,
-    max(url) as url,
-    '/auctions/' || md5(title) as auction_id,
-
-from staging_auctions
-inner join ${unsold} using (title)
-where highest_bid > 0
-group by 1
-having last_seen < today()
-and days_active = 1
-```
-
-
-```sql shortest_running
-select
-    title,
-
-    count(*) as sold,
-    greatest(date_diff('day', min(inserted_at), max(inserted_at)), 1) as days_active,
-    first(retail_price) as retail_price,
-    min(inserted_at) as first_seen,
-    max(inserted_at) as last_seen,
-    max(winning_bid) as highest_bid,
-    min(winning_bid) as lowest_bid,
-    max(url) as url,
-    '/auctions/' || md5(title) as auction_id,
-
-from staging_auctions
-where highest_bid > 0
-group by 1
-having last_seen < today()
-and days_active = 1
-order by days_active asc, sold desc
-```
-
-<DataTable
-    data="{shortest}"
-    search="true"
-    rows=20
->
-    <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
-    <Column id="unsold"/>
-    <Column id="sold"/>
-    <Column id="days_active"/>
-    <Column id="retail_price"/>
-    <Column id="lowest_bid"/>
-    <Column id="highest_bid"/>
-    <Column id="first_seen"/>
-    <Column id="last_seen"/>
-    <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
-</DataTable>
-
-
----

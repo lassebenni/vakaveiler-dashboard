@@ -9,7 +9,7 @@ cleaned_auctions as
 SELECT
   REPLACE(data_lot_product_title, ':', '') AS title,
   CAST(NULLIF(last_won_bid, 'None') AS INTEGER) AS winning_bid,
-  CAST(NULLIF("data_lot_highestBidAmount", 'None') AS INTEGER) as highest_bid,
+  CAST(NULLIF("data_lot_highestBidAmount", 'None') AS INTEGER) as highest_price,
 
   cast(inserted_at as timestamp) as inserted_at,
   date(inserted_at) as day,
@@ -43,7 +43,7 @@ filtered as (
     inserted_at,
     title,
     winning_bid,
-    highest_bid,
+    highest_price,
     total_bids,
     last_bid,
     day,
@@ -66,3 +66,4 @@ select *
 from filtered
 -- Only 2024
 where inserted_at > cast('2024-01-01' as timestamp)
+

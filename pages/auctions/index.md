@@ -2,6 +2,7 @@
 queries:
   - sold_unsold: sold_unsold.sql
 ---
+
 # All auctions (unique titles)
 
 All unique auction titles in the database. You can search for an auction by name. Click on the auction title to go to the details page.

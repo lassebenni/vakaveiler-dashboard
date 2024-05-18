@@ -11,9 +11,9 @@ select
 
     count(*) as won,
     first(retail_price) as retail_price,
-    max(winning_bid) as highest_bid,
+    max(winning_bid) as highest_price,
     median(winning_bid) as median_bid,
-    min(winning_bid) as lowest_bid,
+    min(winning_bid) as lowest_price,
     max(inserted_at) as latest,
     min(inserted_at) as first,
   from staging_auctions

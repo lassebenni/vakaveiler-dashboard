@@ -147,8 +147,8 @@ select
     greatest( max(winning_bid) - first(retail_price), first(retail_price) - min(winning_bid)) as retail_spread,
     count(*) as total_auctions,
     first(retail_price) as retail_price,
-    max(winning_bid) as highest_bid,
-    min(winning_bid) as lowest_bid,
+    max(winning_bid) as highest_price,
+    min(winning_bid) as lowest_price,
     min(inserted_at) as min_date,
     max(inserted_at) as max_date,
     max('/auctions/' || md5(title)) as auction_id,
@@ -166,8 +166,8 @@ select
 >
     <Column id="retail_spread"/>
     <Column id="retail_price"/>
-    <Column id="highest_bid"/>
-    <Column id="lowest_bid"/>
+    <Column id="highest_price"/>
+    <Column id="lowest_price"/>
     <Column id="total_auctions"/>
     <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
     <Column id="min_date"/>
