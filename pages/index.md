@@ -46,7 +46,7 @@ order by 1 asc
 ---
 
 
-### Auctions
+### Won auctions
 
 Search and find auctions. Click on the title to see the details of the auction.
 
@@ -62,7 +62,9 @@ select
     max(winning_bid) as highest_price,
     '/auctions/' || md5(title) as auction_id,
 from staging_auctions
+where winning_bid > 0
 group by 1
+limit 100
 ```
 
 <DataTable
