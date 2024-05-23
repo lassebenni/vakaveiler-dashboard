@@ -21,7 +21,7 @@ select
     median(winning_bid) as median_price,
     min(day) as first_seen,
     max(day) as last_seen,
-    max(md5(title)) as auction_id,
+    max('/auctions/' || md5(title)) as auction_id,
     max('https://vakantieveilingen.nl' || url) as url
 from staging_auctions
 left join unsold_titles using (title)
