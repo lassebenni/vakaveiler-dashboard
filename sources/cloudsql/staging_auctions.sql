@@ -11,7 +11,10 @@ SELECT
   CAST(NULLIF(last_won_bid, 'None') AS INTEGER) AS winning_bid,
   CAST(NULLIF("data_lot_highestBidAmount", 'None') AS INTEGER) as highest_price_amount,
   CAST(NULLIF("data_highestBid_price", 'None') AS INTEGER) as highest_price,
-  COALESCE("data_hasWinner", 'false') AS has_winner,
+  CASE
+    WHEN "data_hasWinner" = 'None' THEN 'false'
+    ELSE COALESCE("data_hasWinner", 'false')
+  END AS has_winner,
 
   cast(inserted_at as timestamp) as inserted_at,
   date(inserted_at) as day,

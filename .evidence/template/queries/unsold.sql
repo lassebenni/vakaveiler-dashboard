@@ -4,5 +4,5 @@ select
 
     count(*) as unsold
 from staging_auctions
-where highest_price = 0
+where has_winner = false
 group by 1, 2
