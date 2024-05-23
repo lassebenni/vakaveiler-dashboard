@@ -1,7 +1,8 @@
 ---
 queries:
-  - sold_unsold: sold_unsold.sql
+  - sold_unsold.sql
 ---
+
 
 # All auctions (unique titles)
 

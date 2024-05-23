@@ -1,46 +1,69 @@
----
-queries:
-  - sold_unsold: sold_unsold.sql
-  - unsold: unsold.sql
----
+```sql base
+select
+    *
+from staging_auctions
+where md5(title) = '${params.auction_id}'
+```
+
+
+
+```sql unsold_total
+select
+    title,
+
+    count(*) as unsold
+from ${base}
+where has_winner = false
+group by 1
+```
 
 ```sql stats
 select
-  *
-from ${sold_unsold}
-where md5(title) = '${params.auction_id}'
+    title,
+
+    count(*) as sold,
+    first(unsold) as unsold,
+    first(unsold) + count(*) as total,
+    first(retail_price) as retail_price,
+    min(winning_bid) as lowest_price,
+    max(winning_bid) as highest_price,
+    median(winning_bid) as median_price,
+    min(day) as first_seen,
+    max(day) as last_seen,
+    max(md5(title)) as auction_id,
+    max('https://vakantieveilingen.nl' || url) as url
+
+from ${base}
+left join ${unsold_total} using (title)
+where has_winner = true
+group by 1
 ```
 
 # Stats
 
-<script>
-$: stats_filtered = stats.filter(d => d.auction_id === $page.params.auction_id);
-$: url = stats_filtered.length > 0 ? stats_filtered[0].url : ""
-</script>
+
+Auction: <b><Value data={stats} column="title" /></b>
+
+Url: <b><Value data={stats} column="url"/></b>
+
+Total: <b><Value data={stats} column="total" /></b>
+
+Sold: <b><Value data={stats} column="sold" /></b>
+
+Unsold: <b><Value data={stats} column="unsold" /></b>
 
 
-Auction: <b><Value data={stats_filtered} column="title" /></b>
+Retail price: <b><Value data={stats} column="retail_price" /></b>
 
-Url:  <u><a href="{url}">{url}</a><u>
+Highest bid: <b><Value data={stats} column="highest_price" /></b>
 
-Total: <b><Value data={stats_filtered} column="total" /></b>
+Median bid: <b><Value data={stats} column="median_price" /></b>
 
-Sold: <b><Value data={stats_filtered} column="sold" /></b>
+Lowest bid: <b><Value data={stats} column="lowest_price" /></b>
 
-Unsold: <b><Value data={stats_filtered} column="unsold" /></b>
+First seen: <b><Value data={stats} column="first_seen" /></b>
 
-
-Retail price: <b><Value data={stats_filtered} column="retail_price" /></b>
-
-Highest bid: <b><Value data={stats_filtered} column="highest_price" /></b>
-
-Median bid: <b><Value data={stats_filtered} column="median_price" /></b>
-
-Lowest bid: <b><Value data={stats_filtered} column="lowest_price" /></b>
-
-First seen: <b><Value data={stats_filtered} column="first_seen" /></b>
-
-Last seen: <b><Value data={stats_filtered} column="last_seen" /></b>
+Last seen: <b><Value data={stats} column="last_seen" /></b>
 
 
 # Winning bids
@@ -59,7 +82,7 @@ select
     max(day) as last_day,
     max(md5(title)) as auction_id
   from staging_auctions
-  where highest_price > 0
+  where has_winner = true
   and md5(title) = '${params.auction_id}'
   group by 1, 2
   order by total desc
@@ -82,7 +105,6 @@ select
 
 # Daily
 
-
 ```sql winning_bids
 select
     title,
@@ -93,16 +115,17 @@ select
     median(winning_bid) as median_price,
     count(winning_bid) as total,
     max(md5(title)) as auction_id,
-  from staging_auctions
-  where highest_price > 0
-  and md5(title) = '${params.auction_id}'
+    sum(count(*)) over (partition by title) as daily_bids
+
+  from ${base}
+  where has_winner = true
   group by 1, 2
 ```
 
 Highest and lowest winning bids per day.
 
 <BarChart
-  data={winning_bids.filter(d=>d.auction_id === $page.params.auction_id)}
+  data={winning_bids}
   x=day
   y={["lowest_price", "median_price", "highest_price"]}
 />
@@ -110,33 +133,16 @@ Highest and lowest winning bids per day.
 Total auctions per day.
 
 <LineChart
-  data={winning_bids.filter(d=>d.auction_id === $page.params.auction_id)}
+  data={winning_bids}
   x=day
   y="total"
 />
 
 
-```sql daily_bids
-select
-    title,
-    day,
-
-    min(winning_bid) as lowest_price,
-    max(winning_bid) as highest_price,
-    count(*) as total,
-    sum(count(*)) over (partition by title) as daily_bids,
-    max(md5(title)) as auction_id,
-  from staging_auctions
-  where highest_price > 0
-  and md5(title) = '${params.auction_id}'
-  group by 1, 2
-  order by day desc
-```
-
 Table for daily winners.
 
 <DataTable 
-  data="{daily_bids.filter(d=>d.auction_id === $page.params.auction_id)}"
+  data="{winning_bids}"
   search="true"
   sortable="true"
 />
@@ -156,9 +162,8 @@ select
     count(*) as total,
     sum(count(*)) over (partition by title) as daily_bids,
     max(md5(title)) as auction_id,
-  from staging_auctions
-  where highest_price > 0
-  and md5(title) = '${params.auction_id}'
+  from ${base}
+  where has_winner = true
   group by 1, 2
   order by hour asc
 ```
@@ -166,7 +171,7 @@ select
 Winners per hour of the day.
 
 <BarChart
-  data={hourly_bids.filter(d=>d.auction_id === $page.params.auction_id)}
+  data={hourly_bids}
   x=hour
   y={["lowest_price", "median_price", "highest_price"]}
 />
@@ -174,7 +179,7 @@ Winners per hour of the day.
 Total auctions per hour of the day.
 
 <LineChart
-  data={hourly_bids.filter(d=>d.auction_id === $page.params.auction_id)}
+  data={hourly_bids}
   x=hour
   y=total
 />
@@ -182,7 +187,7 @@ Total auctions per hour of the day.
 Table for hourly winners.
 
 <DataTable 
-  data="{hourly_bids.filter(d=>d.auction_id === $page.params.auction_id)}"
+  data="{hourly_bids}"
   search="true"
   sortable="true"
 />
@@ -209,9 +214,8 @@ select
     count(*) as total,
     sum(count(*)) over (partition by title) as total_bids,
     max(md5(title)) as auction_id,
-  from staging_auctions
-  where highest_price > 0
-  and md5(title) = '${params.auction_id}'
+  from ${base}
+  where has_winner = true
   group by 1, 2
   order by day_nr asc
 ```
@@ -219,7 +223,7 @@ select
 Winners on each day of the week.
 
 <BarChart
-  data={weekday_bids.filter(d=>d.auction_id === $page.params.auction_id)}
+  data={weekday_bids}
   x=weekday
   y={["lowest_price", "median_price", "highest_price"]}
   type=grouped
@@ -229,7 +233,7 @@ Winners on each day of the week.
 Total auctions on each day of the week.
 
 <LineChart
-  data={weekday_bids.filter(d=>d.auction_id === $page.params.auction_id)}
+  data={weekday_bids}
   x=weekday
   y=total
   sort=false
@@ -238,7 +242,7 @@ Total auctions on each day of the week.
 Weekday winners table.
 
 <DataTable 
-  data="{weekday_bids.filter(d=>d.auction_id === $page.params.auction_id)}"
+  data="{weekday_bids}"
   search="true"
   sortable="true"
 />
@@ -263,9 +267,8 @@ select
     count(*) as total,
     sum(count(*)) over (partition by title) as daily_bids,
     max(md5(title)) as auction_id,
-  from staging_auctions
-  where highest_price > 0
-  and md5(title) = '${params.auction_id}'
+  from ${base}
+  where has_winner = true
   group by 1, 2, 3, 4
   order by total desc
 ```
@@ -273,7 +276,7 @@ select
 Total number of won auctions per customer.
 
 <BarChart
-  data={bidders.filter(d=>d.auction_id === $page.params.auction_id)}
+  data={bidders}
   x="winner_customer_name"
   y="total"
 />
@@ -281,7 +284,7 @@ Total number of won auctions per customer.
 Table for customer's that won this auction.
  
 <DataTable 
-  data="{bidders.filter(d=>d.auction_id === $page.params.auction_id)}"
+  data="{bidders}"
   search="true"
   sortable="true"
 />
@@ -297,8 +300,8 @@ select
   median(winning_bid) as median_winning_bid,
   min(winning_bid) as min,
   max(winning_bid) as max,
-from staging_auctions
-where md5(title) = '${params.auction_id}'
+from ${base}
+where has_winner = true
 group by 1
 order by 1 asc
 ```
@@ -327,8 +330,7 @@ select
   percentile_cont(0.75) within group (order by winning_bid) as q3,
   percentile_cont(0.05) within group (order by winning_bid) as q5,
   percentile_cont(0.95) within group (order by winning_bid) as q95,
-from staging_auctions
-where md5(title) = '${params.auction_id}'
+from ${base}
 group by 1, 2
 order by 1 asc
 ```
@@ -344,25 +346,26 @@ order by 1 asc
 />
 
 
----
+--
 # Unsold over time
 
 Total number of unsold auctions over time
 
-```sql unsold_over_time
+```sql unsold_daily
 select
-    day,
-    unsold
+    title,
+    date_trunc('day', inserted_at) as day,
 
-from ${unsold}
-where md5(title) = '${params.auction_id}'
+    count(*) as unsold
+from ${base}
+where has_winner = false
+group by 1, 2
 ```
 
-
 <LineChart
-    data={unsold_over_time}
+    data={unsold_daily}
     y=unsold
     x=day
     xAxisTitle="Days" 
     yAxisTitle="Unsold" 
-/>
+/>-

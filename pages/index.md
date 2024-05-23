@@ -1,3 +1,8 @@
+---
+queries:
+  - titles.sql
+---
+
 # Vakantieveilingen.nl auctions tracker
 This website tracks the auctions won on https://vakantieveilingen.nl, a Dutch auction website.
 
@@ -42,43 +47,6 @@ order by 1 asc
     xAxisTitle="Days" 
     yAxisTitle="Total auctions" 
 />
-
----
-
-
-### Won auctions
-
-Search and find auctions. Click on the title to see the details of the auction.
-
-```sql titles
-select
-    title,
-
-    first('https://vakantieveilingen.nl/' || url) as url,
-    count(*) as total,
-    min(inserted_at) as min_date,
-    max(inserted_at) as max_date,
-    min(winning_bid) as lowest_price,
-    max(winning_bid) as highest_price,
-    '/auctions/' || md5(title) as auction_id,
-from staging_auctions
-where winning_bid > 0
-group by 1
-```
-
-<DataTable
-    data="{titles}"
-    search="true"
-    rows=20
->
-    <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
-    <Column id="total"/>
-    <Column id="lowest_price"/>
-    <Column id="highest_price"/>
-    <Column id="min_date"/>
-    <Column id="max_date"/>
-    <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
-</DataTable>
 
 ---
 

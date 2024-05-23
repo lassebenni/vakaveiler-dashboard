@@ -1,7 +1,7 @@
 with deduped as (
     select
       distinct on("data_lot_product_title", "data_lot_tsEmbargo") *
-    from auctions.auctions
+    from auctions.auctions_v2
     order by "data_lot_product_title", "data_lot_tsEmbargo", inserted_at desc
 ),
 cleaned_auctions as 
@@ -9,7 +9,9 @@ cleaned_auctions as
 SELECT
   REPLACE(data_lot_product_title, ':', '') AS title,
   CAST(NULLIF(last_won_bid, 'None') AS INTEGER) AS winning_bid,
-  CAST(NULLIF("data_lot_highestBidAmount", 'None') AS INTEGER) as highest_price,
+  CAST(NULLIF("data_lot_highestBidAmount", 'None') AS INTEGER) as highest_price_amount,
+  CAST(NULLIF("data_highestBid_price", 'None') AS INTEGER) as highest_price,
+  COALESCE("data_hasWinner", 'false') AS has_winner,
 
   cast(inserted_at as timestamp) as inserted_at,
   date(inserted_at) as day,
@@ -21,7 +23,6 @@ SELECT
   "data_lot_product_keywords" AS keywords,
   "data_lot_product_supplier_name" AS supplier_name,
   "data_lot_tsExpires" AS expires_at,
-  "data_isRunning" AS is_running,
   cast("data_lot_product_retailPrice" as float) AS retail_price
 
 FROM
@@ -54,8 +55,8 @@ filtered as (
     supplier_name,
     keywords,
     expires_at,
-    is_running,
-    retail_price
+    retail_price,
+    has_winner
 
   from cleaned_auctions
   inner join total_bids using (title)
@@ -64,6 +65,3 @@ filtered as (
 
 select *
 from filtered
--- Only 2024
-where inserted_at > cast('2024-01-01' as timestamp)
-
