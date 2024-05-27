@@ -103,6 +103,41 @@ select
     <Column id="first_day"/>
 </DataTable>
 
+# Cheapest moments
+
+```sql top_10_cheapest_moments
+SELECT
+  CASE EXTRACT('dayofweek' FROM inserted_at)
+        WHEN 0 THEN 'Sun.'
+        WHEN 1 THEN 'Mon.'
+        WHEN 2 THEN 'Tue.'
+        WHEN 3 THEN 'Wed.'
+        WHEN 4 THEN 'Thu.'
+        WHEN 5 THEN 'Fri.'
+        WHEN 6 THEN 'Sat.'
+     END AS weekday,
+  EXTRACT('hour' FROM inserted_at) AS hour,
+
+  MIN(winning_bid) AS min_price
+FROM ${base}
+WHERE has_winner = true
+GROUP BY 1, 2
+ORDER BY min_price ASC
+LIMIT 10
+```
+
+<Heatmap 
+    data={top_10_cheapest_moments} 
+    x=weekday 
+    y=hour 
+    value=min_price 
+    valueFmt=eur 
+    colorPalette={['white', 'green']}
+    title="Cheapest moments"
+    subtitle="Minimum price"
+/>
+
+
 # Daily
 
 ```sql winning_bids
