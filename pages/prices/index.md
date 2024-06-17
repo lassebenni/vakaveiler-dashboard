@@ -14,6 +14,7 @@ SELECT
   max(l.inserted_at) AS max_date,
   max('/auctions/' || md5(l.title)) as auction_id,
   median(l.winning_bid) AS median_winning_bid,
+  sum(l.winning_bid) as total_spent,
   sum(CASE WHEN l.winning_bid = l.min_winning_bid THEN 1 ELSE 0 END) AS frequency_of_lowest_price,
   sum(CASE WHEN l.winning_bid = l.max_winning_bid THEN 1 ELSE 0 END) AS frequency_of_highest_price,
 from (
@@ -24,6 +25,41 @@ from (
 ) l
 group by 1, 2
 ```
+
+# Most money spent
+
+Top 100 auctions with the most money spent.
+
+```sql most_money_spent
+SELECT
+  title,
+  total_spent,
+  lowest_price,
+  total_auctions,
+  highest_price,
+  min_date,
+  max_date,
+  auction_id
+
+FROM ${prices}
+ORDER BY 2 desc
+LIMIT 100
+```
+
+<DataTable
+  data="{most_money_spent}"
+  search="true"
+  sortable="true"
+  rows=20
+>
+    <Column id="total_spent"/>
+    <Column id="total_auctions"/>
+    <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
+    <Column id="min_date"/>
+    <Column id="max_date"/>
+    <Column id="highest_price"/>
+    <Column id="lowest_price"/>
+</DataTable>
 
 # Cheapest auctions
 

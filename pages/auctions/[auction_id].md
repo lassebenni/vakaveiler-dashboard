@@ -25,6 +25,7 @@ select
     first(unsold) as unsold,
     first(unsold) + count(*) as total,
     first(retail_price) as retail_price,
+    sum(winning_bid) as total_spent,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
     median(winning_bid) as median_price,
@@ -44,9 +45,11 @@ group by 1
 
 Auction: <b><Value data={stats} column="title" /></b>
 
-Url: <b><Value data={stats} column="url"/></b>
+URL: <b><Value data={stats} column="url" /></b>
 
-Total: <b><Value data={stats} column="total" /></b>
+Total Auctions: <b><Value data={stats} column="total" /></b>
+
+Total Spent: <b><Value data={stats} column="total_spent" /></b>
 
 Sold: <b><Value data={stats} column="sold" /></b>
 
@@ -64,6 +67,41 @@ Lowest bid: <b><Value data={stats} column="lowest_price" /></b>
 First seen: <b><Value data={stats} column="first_seen" /></b>
 
 Last seen: <b><Value data={stats} column="last_seen" /></b>
+
+# Cheapest moments
+
+For each hour of the day, shows the total spent (sum of winning bids).
+
+
+```sql price_moments
+SELECT
+  CASE EXTRACT('dayofweek' FROM inserted_at)
+        WHEN 0 THEN 'Sun.'
+        WHEN 1 THEN 'Mon.'
+        WHEN 2 THEN 'Tue.'
+        WHEN 3 THEN 'Wed.'
+        WHEN 4 THEN 'Thu.'
+        WHEN 5 THEN 'Fri.'
+        WHEN 6 THEN 'Sat.'
+     END AS weekday,
+  EXTRACT('hour' FROM inserted_at) AS hour,
+
+  sum(winning_bid) AS total_price
+FROM ${base}
+WHERE has_winner = true
+GROUP BY 1, 2
+```
+
+<Heatmap 
+    data={price_moments} 
+    x=weekday 
+    y=hour 
+    value=total_price 
+    valueFmt=eur 
+    colorPalette={['white', 'green', 'red']}
+    title="Cheapest moments"
+    subtitle="Minimum price"
+/>
 
 
 # Winning bids
@@ -103,39 +141,6 @@ select
     <Column id="first_day"/>
 </DataTable>
 
-# Cheapest moments
-
-```sql top_10_cheapest_moments
-SELECT
-  CASE EXTRACT('dayofweek' FROM inserted_at)
-        WHEN 0 THEN 'Sun.'
-        WHEN 1 THEN 'Mon.'
-        WHEN 2 THEN 'Tue.'
-        WHEN 3 THEN 'Wed.'
-        WHEN 4 THEN 'Thu.'
-        WHEN 5 THEN 'Fri.'
-        WHEN 6 THEN 'Sat.'
-     END AS weekday,
-  EXTRACT('hour' FROM inserted_at) AS hour,
-
-  MIN(winning_bid) AS min_price
-FROM ${base}
-WHERE has_winner = true
-GROUP BY 1, 2
-ORDER BY min_price ASC
-LIMIT 10
-```
-
-<Heatmap 
-    data={top_10_cheapest_moments} 
-    x=weekday 
-    y=hour 
-    value=min_price 
-    valueFmt=eur 
-    colorPalette={['white', 'green']}
-    title="Cheapest moments"
-    subtitle="Minimum price"
-/>
 
 
 # Daily
