@@ -86,7 +86,8 @@ SELECT
      END AS weekday,
   EXTRACT('hour' FROM inserted_at) AS hour,
 
-  sum(winning_bid) AS total_price
+  median(winning_bid) AS median_price,
+  count(*) AS total
 FROM ${base}
 WHERE has_winner = true
 GROUP BY 1, 2
@@ -96,13 +97,22 @@ GROUP BY 1, 2
     data={price_moments} 
     x=weekday 
     y=hour 
-    value=total_price 
-    valueFmt=eur 
-    colorPalette={['white', 'green', 'red']}
-    title="Cheapest moments"
-    subtitle="Minimum price"
+    value=total 
+    colorPalette={['red', 'white', 'green']}
+    title="Total auctions per hour, per day"
+    subtitle="Total auctions"
 />
 
+<Heatmap 
+    data={price_moments} 
+    x=weekday 
+    y=hour 
+    value=median_price 
+    valueFmt=eur 
+    colorPalette={['white', 'green', 'red']}
+    title="Median winning bid"
+    subtitle="Median winning bid price"
+/>
 
 # Winning bids
 
