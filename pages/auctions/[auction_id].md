@@ -13,7 +13,7 @@ select
 
     count(*) as unsold
 from ${base}
-where has_winner = false
+where has_winner = 'False'
 group by 1
 ```
 
@@ -36,7 +36,7 @@ select
 
 from ${base}
 left join ${unsold_total} using (title)
-where has_winner = true
+where has_winner = 'True'
 group by 1
 ```
 
@@ -89,7 +89,7 @@ SELECT
   median(winning_bid) AS median_price,
   count(*) AS total
 FROM ${base}
-WHERE has_winner = true
+WHERE has_winner = 'True'
 GROUP BY 1, 2
 ```
 
@@ -130,7 +130,7 @@ select
     max(day) as last_day,
     max(md5(title)) as auction_id
   from staging_auctions
-  where has_winner = true
+  where has_winner = 'True'
   and md5(title) = '${params.auction_id}'
   group by 1, 2
   order by total desc
@@ -168,7 +168,7 @@ select
     sum(count(*)) over (partition by title) as daily_bids
 
   from ${base}
-  where has_winner = true
+  where has_winner = 'True'
   group by 1, 2
 ```
 
@@ -213,7 +213,7 @@ select
     sum(count(*)) over (partition by title) as daily_bids,
     max(md5(title)) as auction_id,
   from ${base}
-  where has_winner = true
+  where has_winner = 'True'
   group by 1, 2
   order by hour asc
 ```
@@ -265,7 +265,7 @@ select
     sum(count(*)) over (partition by title) as total_bids,
     max(md5(title)) as auction_id,
   from ${base}
-  where has_winner = true
+  where has_winner = 'True'
   group by 1, 2
   order by day_nr asc
 ```
@@ -277,7 +277,7 @@ Winners on each day of the week.
   x=weekday
   y={["lowest_price", "median_price", "highest_price"]}
   type=grouped
-  sort=false
+  sort= 'False'
 />
 
 Total auctions on each day of the week.
@@ -286,7 +286,7 @@ Total auctions on each day of the week.
   data={weekday_bids}
   x=weekday
   y=total
-  sort=false
+  sort= 'False'
 />
 
 Weekday winners table.
@@ -318,7 +318,7 @@ select
     sum(count(*)) over (partition by title) as daily_bids,
     max(md5(title)) as auction_id,
   from ${base}
-  where has_winner = true
+  where has_winner = 'True'
   group by 1, 2, 3, 4
   order by total desc
 ```
@@ -351,7 +351,7 @@ select
   min(winning_bid) as min,
   max(winning_bid) as max,
 from ${base}
-where has_winner = true
+where has_winner = 'True'
 group by 1
 order by 1 asc
 ```
@@ -408,7 +408,7 @@ select
 
     count(*) as unsold
 from ${base}
-where has_winner = false
+where has_winner = 'False'
 group by 1, 2
 ```
 

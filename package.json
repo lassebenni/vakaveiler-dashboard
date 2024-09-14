@@ -7,11 +7,12 @@
     "dev": "evidence dev --open /",
     "test": "evidence build",
     "sources": "evidence sources",
-    "update": "npm install @evidence-dev/evidence@latest @evidence-dev/core-components@latest"
+    "update": "npm install @evidence-dev/evidence@latest @evidence-dev/core-components@latest @evidence-dev/postgres@latest"
   },
   "type": "module",
   "dependencies": {
-    "@evidence-dev/core-components": "^4.2.0",
-    "@evidence-dev/evidence": "^35.0.0"
+    "@evidence-dev/core-components": "^4.8.0",
+    "@evidence-dev/evidence": "^39.1.7",
+    "@evidence-dev/postgres": "^1.0.6"
   }
 }

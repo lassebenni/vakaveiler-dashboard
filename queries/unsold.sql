@@ -4,5 +4,5 @@ select
 
     count(*) as unsold
 from staging_auctions
-where has_winner = false
+where has_winner = 'True'
 group by 1, 2

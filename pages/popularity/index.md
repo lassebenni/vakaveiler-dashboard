@@ -203,6 +203,8 @@ where unsold > sold
     data="{more_unsold}"
     search="true"
     rows=20
+    emptySet='pass'
+    emptyMessage='No auctions found with more unsold items.'
 >
     <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
     <Column id="unsold"/>
@@ -235,6 +237,8 @@ where unsold > 1
     x=day
     xAxisTitle="Days" 
     yAxisTitle="Total auctions" 
+    emptySet='pass'
+    emptyMessage='No auctions found with more unsold items.'
 />
 
 ---

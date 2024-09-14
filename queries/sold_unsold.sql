@@ -4,7 +4,7 @@ select
 
     count(*) as unsold
 from staging_auctions
-where has_winner = false
+where has_winner = 'False'
 group by 1
 order by unsold desc
 )
@@ -25,6 +25,6 @@ select
     max('https://vakantieveilingen.nl' || url) as url
 from staging_auctions
 left join unsold_titles using (title)
-where has_winner = true
+where has_winner = 'True'
 group by 1
 order by unsold desc
