@@ -30,8 +30,8 @@ GROUP BY 1, 2
     value=total_price 
     valueFmt=eur 
     colorPalette={['white', 'green', 'red']}
-    title="Cheapest moments"
-    subtitle="Minimum price"
+    title="Total spent per hour"
+    subtitle="Total spent per hour of the day, for each weekday"
 />
 
 <Heatmap 

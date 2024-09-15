@@ -68,9 +68,6 @@ First seen: <b><Value data={stats} column="first_seen" /></b>
 
 Last seen: <b><Value data={stats} column="last_seen" /></b>
 
-# Cheapest moments
-
-For each hour of the day, shows the total spent (sum of winning bids).
 
 
 ```sql price_moments
@@ -84,35 +81,104 @@ SELECT
         WHEN 5 THEN 'Fri.'
         WHEN 6 THEN 'Sat.'
      END AS weekday,
+  EXTRACT('dayofweek' FROM inserted_at) as weekday_number,
   EXTRACT('hour' FROM inserted_at) AS hour,
 
   median(winning_bid) AS median_price,
-  count(*) AS total
+  count(*) AS sales_count
+
 FROM ${base}
 WHERE has_winner = 'True'
-GROUP BY 1, 2
+GROUP BY 1, 2, 3
+order by 2 asc
 ```
 
-<Heatmap 
-    data={price_moments} 
-    x=weekday 
-    y=hour 
-    value=total 
-    colorPalette={['red', 'white', 'green']}
-    title="Total auctions per hour, per day"
-    subtitle="Total auctions"
-/>
+# Median Price per Hour
+
+
+```sql price_stats
+  select 
+    max(median_price) as max_median_price,
+    min(median_price) as min_median_price,
+    max(sales_count) as max_sales_count
+  from ${price_moments}
+```
+
+```sql best_moments
+    SELECT
+        ps.weekday,
+        ps.hour,
+        ps.median_price,
+        ps.sales_count,
+        -- Calculate best moment score based on price difference and sales volume
+        CASE
+            WHEN ps.median_price IS NOT NULL AND ps.sales_count IS NOT NULL THEN
+                ((pss.max_median_price - ps.median_price) / 
+                    NULLIF((pss.max_median_price - pss.min_median_price), 0)) *
+                (ps.sales_count::float / NULLIF(pss.max_sales_count, 0))
+            ELSE NULL
+        END AS best_moment_score,
+        ROW_NUMBER() OVER (ORDER BY best_moment_score DESC) AS rank
+
+    FROM ${price_moments} ps
+    CROSS JOIN ${price_stats} pss
+    order by weekday_number asc
+ ```
+
+ ```sql top_ten_best_moments
+ SELECT
+    weekday,
+    hour,
+    rank,
+    sales_count,
+    best_moment_score,
+    case
+        when rank <= 20 THEN median_price
+        else null
+    end as median_price
+
+  FROM ${best_moments}
+ ```
+
+# Best Moment to Buy
 
 <Heatmap 
-    data={price_moments} 
-    x=weekday 
-    y=hour 
-    value=median_price 
-    valueFmt=eur 
-    colorPalette={['white', 'green', 'red']}
-    title="Median winning bid"
-    subtitle="Median winning bid price"
-/>
+    data={top_ten_best_moments}
+    x="weekday"
+    y="hour"
+    value="median_price"
+    colorPalette={['white', 'green', 'yellow', 'red']}
+    min=1
+    title="Best Moment to Buy"
+    subtitle="Top 10 best buying times (low median price & high sales)"
+ />
+
+ # Sales per Hour
+
+ <Heatmap 
+    data={price_moments}
+    x="weekday"
+    y="hour"
+    value="sales_count"
+    colorPalette={['white', 'red', 'yellow', 'green']}
+    min=1
+    title="Sales per Hour"
+    subtitle="Number of sales per hour of the day, for each weekday"
+ />
+
+ # Median Price per Hour
+
+ <Heatmap 
+    data={price_moments}
+    x="weekday"
+    y="hour"
+    value="median_price"
+    colorPalette={['white', 'green', 'yellow', 'red']}
+    min=1
+    title="Median Price per Hour"
+    subtitle="Median price per hour of the day, for each weekday"
+ />
+
 
 # Winning bids
 
@@ -152,192 +218,6 @@ select
 </DataTable>
 
 
-
-# Daily
-
-```sql winning_bids
-select
-    title,
-    day,
-
-    min(winning_bid) as lowest_price,
-    max(winning_bid) as highest_price,
-    median(winning_bid) as median_price,
-    count(winning_bid) as total,
-    max(md5(title)) as auction_id,
-    sum(count(*)) over (partition by title) as daily_bids
-
-  from ${base}
-  where has_winner = 'True'
-  group by 1, 2
-```
-
-Highest and lowest winning bids per day.
-
-<BarChart
-  data={winning_bids}
-  x=day
-  y={["lowest_price", "median_price", "highest_price"]}
-/>
-
-Total auctions per day.
-
-<LineChart
-  data={winning_bids}
-  x=day
-  y="total"
-/>
-
-
-Table for daily winners.
-
-<DataTable 
-  data="{winning_bids}"
-  search="true"
-  sortable="true"
-/>
-
----
-
-# Hourly
-
-```sql hourly_bids
-select
-    title,
-    extract('hour' FROM inserted_at) as hour,
-
-    min(winning_bid) as lowest_price,
-    max(winning_bid) as highest_price,
-    median(winning_bid) as median_price,
-    count(*) as total,
-    sum(count(*)) over (partition by title) as daily_bids,
-    max(md5(title)) as auction_id,
-  from ${base}
-  where has_winner = 'True'
-  group by 1, 2
-  order by hour asc
-```
-
-Winners per hour of the day.
-
-<BarChart
-  data={hourly_bids}
-  x=hour
-  y={["lowest_price", "median_price", "highest_price"]}
-/>
-
-Total auctions per hour of the day.
-
-<LineChart
-  data={hourly_bids}
-  x=hour
-  y=total
-/>
-
-Table for hourly winners.
-
-<DataTable 
-  data="{hourly_bids}"
-  search="true"
-  sortable="true"
-/>
-
-# Weekdays
-
-```sql weekday_bids
-select
-    title,
-    extract('dayofweek' FROM inserted_at) as day_nr,
-
-    CASE EXTRACT('dayofweek' FROM inserted_at)
-        WHEN 0 THEN 'Sun.'
-        WHEN 1 THEN 'Mon.'
-        WHEN 2 THEN 'Tue.'
-        WHEN 3 THEN 'Wed.'
-        WHEN 4 THEN 'Thu.'
-        WHEN 5 THEN 'Fri.'
-        WHEN 6 THEN 'Sat.'
-     END AS weekday,
-    min(winning_bid) as lowest_price,
-    max(winning_bid) as highest_price,
-    median(winning_bid) as median_price,
-    count(*) as total,
-    sum(count(*)) over (partition by title) as total_bids,
-    max(md5(title)) as auction_id,
-  from ${base}
-  where has_winner = 'True'
-  group by 1, 2
-  order by day_nr asc
-```
-
-Winners on each day of the week.
-
-<BarChart
-  data={weekday_bids}
-  x=weekday
-  y={["lowest_price", "median_price", "highest_price"]}
-  type=grouped
-  sort= 'False'
-/>
-
-Total auctions on each day of the week.
-
-<LineChart
-  data={weekday_bids}
-  x=weekday
-  y=total
-  sort= 'False'
-/>
-
-Weekday winners table.
-
-<DataTable 
-  data="{weekday_bids}"
-  search="true"
-  sortable="true"
-/>
-
----
-
-# Customers
-
-```sql bidders
-select
-    title,
-    winner_customer_id,
-    winner_first_name,
-    winner_last_name,
-    case when winner_first_name is null then 'Unknown' else concat(winner_first_name,' ', winner_last_name) end as winner_customer_name,
-
-    min(winning_bid) as lowest_price,
-    max(winning_bid) as highest_price,
-    median(winning_bid) as median_price,
-    min(day) as first_day,
-    max(day) as last_day,
-    count(*) as total,
-    sum(count(*)) over (partition by title) as daily_bids,
-    max(md5(title)) as auction_id,
-  from ${base}
-  where has_winner = 'True'
-  group by 1, 2, 3, 4
-  order by total desc
-```
-
-Total number of won auctions per customer.
-
-<BarChart
-  data={bidders}
-  x="winner_customer_name"
-  y="total"
-/>
-
-Table for customer's that won this auction.
- 
-<DataTable 
-  data="{bidders}"
-  search="true"
-  sortable="true"
-/>
 
 # Price distribution over time
 
@@ -394,28 +274,3 @@ order by 1 asc
     intervalBottom=q5
     intervalTop=q95
 />
-
-
---
-# Unsold over time
-
-Total number of unsold auctions over time
-
-```sql unsold_daily
-select
-    title,
-    date_trunc('day', inserted_at) as day,
-
-    count(*) as unsold
-from ${base}
-where has_winner = 'False'
-group by 1, 2
-```
-
-<LineChart
-    data={unsold_daily}
-    y=unsold
-    x=day
-    xAxisTitle="Days" 
-    yAxisTitle="Unsold" 
-/>-

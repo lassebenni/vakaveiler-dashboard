@@ -3,7 +3,7 @@ WITH deduped AS (
         *,
         REPLACE(data_lot_product_title, ':', '') AS title
     FROM auctions.auctions_v2
-    WHERE inserted_at::timestamp >= date_trunc('month', now()) AND inserted_at IS NOT NULL
+    WHERE inserted_at::timestamp >= date_trunc('month', now() - interval '1 month') AND inserted_at IS NOT NULL
     ORDER BY "data_lot_product_title", "data_lot_tsEmbargo", inserted_at DESC
 ),
 cleaned_auctions AS (
