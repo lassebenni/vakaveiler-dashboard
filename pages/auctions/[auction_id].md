@@ -23,7 +23,7 @@ select
 
     count(*) as sold,
     first(unsold) as unsold,
-    first(unsold) + count(*) as total,
+    coalesce(first(unsold), 0) + count(*) as total,
     first(retail_price) as retail_price,
     sum(winning_bid) as total_spent,
     min(winning_bid) as lowest_price,
@@ -49,12 +49,11 @@ URL: <b><Value data={stats} column="url" /></b>
 
 Total Auctions: <b><Value data={stats} column="total" /></b>
 
-Total Spent: <b><Value data={stats} column="total_spent" /></b>
-
 Sold: <b><Value data={stats} column="sold" /></b>
 
 Unsold: <b><Value data={stats} column="unsold" /></b>
 
+Total Spent: <b><Value data={stats} column="total_spent" /></b>
 
 Retail price: <b><Value data={stats} column="retail_price" /></b>
 
@@ -147,7 +146,7 @@ order by 2 asc
     x="weekday"
     y="hour"
     value="median_price"
-    colorPalette={['white', 'green', 'yellow', 'red']}
+    colorPalette={['white', 'red', 'yellow', 'green']}
     min=1
     title="Best Moment to Buy"
     subtitle="Top 10 best buying times (low median price & high sales)"
@@ -160,7 +159,7 @@ order by 2 asc
     x="weekday"
     y="hour"
     value="sales_count"
-    colorPalette={['white', 'red', 'yellow', 'green']}
+    colorPalette={['red', 'yellow', 'green']}
     min=1
     title="Sales per Hour"
     subtitle="Number of sales per hour of the day, for each weekday"

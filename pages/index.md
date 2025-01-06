@@ -15,6 +15,7 @@ select
     min(cast(inserted_at as timestamp)) as day,
     count(distinct title) as distinct_auctions,
     count(inserted_at) as total,
+    sum(winning_bid) as total_spent,
     (select count(inserted_at) as total from staging_auctions where winning_bid > 0) as total_winners
 from staging_auctions
 ```
@@ -24,6 +25,7 @@ from staging_auctions
 - Most recent bid: <Value data={most_recent_bid} column="latest"/>
 - Tracking since: <Value data={most_recent_bid} column="day"/>
 - Total unique auctions: <Value data={most_recent_bid} column="distinct_auctions"/>
+- Total spent: <Value data={most_recent_bid} column="total_spent" fmt=eur/>
 - Total winners: <Value data={most_recent_bid} column="total_winners" />
 
 ---

@@ -14,7 +14,7 @@ select
 
     count(*) as sold,
     first(unsold) as unsold,
-    first(unsold) + count(*) as total,
+    coalesce(first(unsold), 0) + count(*) as total,
     first(retail_price) as retail_price,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,

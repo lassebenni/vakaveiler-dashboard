@@ -41,52 +41,38 @@ order by 2 desc
 />
 
 
-## Auctions by keyword
+## Keyword Popularity Over Time
 
-Find all auctions for a keyword
-
-<Dropdown
-    data={single_keywords_count}
-    name=keywords
-    value=keyword
-    defaultValue=""
-/>
-
-
-```sql titles
+```sql keyword_popularity
+with unnested_keywords as (
+    select
+        date_trunc('month', inserted_at) as month,
+        unnest(string_to_array(NULLIF(trim(both '[]' from keywords), ''), ',')) as keyword
+    from staging_auctions
+),
+top_keywords as (
+    select
+        keyword,
+        sum(count(*)) over (partition by keyword) as total
+    from unnested_keywords
+    group by keyword
+    order by total desc
+    limit 5
+)
 select
-    title,
-
-    first(${inputs.keywords.value}) as keyword,
-    first('https://vakantieveilingen' || url) as url,
-    first(keywords) as keywords,
-    count(*) as total,
-    min(inserted_at) as min_date,
-    max(inserted_at) as max_date,
-    first(retail_price) as retail_price,
-    min(winning_bid) as lowest_price,
-    median(winning_bid) as median_price,
-    max(winning_bid) as highest_price,
-     '/auctions/' || md5(title) as auction_id,
-from staging_auctions
-where regexp_matches(keywords, ${inputs.keywords.value})
-group by 1
+    month,
+    keyword,
+    count(*) as total
+from unnested_keywords
+where keyword in (select keyword from top_keywords)
+group by 1, 2
+order by 1, 2
 ```
 
-<DataTable
-    data="{titles}"
-    search="true"
-    rows=20
->
-    <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
-    <Column id="keyword"/>
-    <Column id="keywords"/>
-    <Column id="total"/>
-    <Column id="retail_price"/>
-    <Column id="lowest_price"/>
-    <Column id="median_price"/>
-    <Column id="highest_price"/>
-    <Column id="min_date"/>
-    <Column id="max_date"/>
-    <Column id="url" contentType="link" linkLabel="url" openInNewTab="true"/>
-</DataTable>
+<AreaChart
+    data="{keyword_popularity}"
+    x="month"
+    y="total"
+    series="keyword"
+    title="Top 10 Most Popular Keywords Over Time"
+/>
