@@ -12,8 +12,8 @@
   },
   "type": "module",
   "dependencies": {
-    "@evidence-dev/core-components": "^4.8.0",
-    "@evidence-dev/evidence": "^39.1.7",
+    "@evidence-dev/core-components": "^4.8.11",
+    "@evidence-dev/evidence": "^39.1.14",
     "@evidence-dev/postgres": "^1.0.6"
   }
 }
