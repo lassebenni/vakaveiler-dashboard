@@ -158,6 +158,7 @@ select
     count(*) as total,
     min(winning_bid) as lowest_price,
     max(winning_bid) as highest_price,
+    median(winning_bid) as median_price,
     min(inserted_at) as min_date,
     max(inserted_at) as max_date,
     max('/auctions/' || md5(title)) as auction_id,
@@ -178,6 +179,7 @@ Top 100 auctions with the most winning bids. Some recurring auctions can be bid 
 >
     <Column id="total"/>
     <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
+    <Column id="median_price"/>
     <Column id="lowest_price"/>
     <Column id="highest_price"/>
     <Column id="min_date"/>
@@ -209,7 +211,7 @@ where unsold > sold
     <Column id="auction_id" title="Title" contentType="link" linkLabel="title" openInNewTab="true"/>
     <Column id="unsold"/>
     <Column id="sold"/>
-    <Column id="days_active"/>
+    <!-- <Column id="days_active"/> -->
     <Column id="retail_price"/>
     <Column id="lowest_price"/>
     <Column id="highest_price"/>

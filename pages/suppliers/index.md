@@ -7,6 +7,7 @@ select
     count(*) as count,
     sum(winning_bid) as total_revenue,
     max(winning_bid) as highest_price,
+    median(winning_bid) as median_price,
     min(winning_bid) as lowest_price,
     max(inserted_at) as latest,
     min(inserted_at) as first
@@ -26,6 +27,7 @@ order by count desc
 <Column id=supplier_name title='Supplier'/>
 <Column id=count title='Total auctions'/>
 <Column id=total_revenue fmt=nnum2m/>
+<Column id=median_price fmt=eur/>
 <Column id=highest_price fmt=eur/>
 <Column id=lowest_price fmt=eur/>
 <Column id=latest/>

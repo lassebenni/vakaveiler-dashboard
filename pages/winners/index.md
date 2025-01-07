@@ -28,4 +28,16 @@ select
   search="true"
   sortable="true"
   rows=20
-/>
+>
+    <Column id="title" />
+    <Column id="winner_last_name" />
+    <Column id="winner_first_name" />
+    <!-- <Column id="winner_customer_id" /> -->
+    <Column id="won" />
+    <Column id="retail_price" />
+    <Column id="highest_price" />
+    <Column id="median_bid" />
+    <Column id="lowest_price" />
+    <Column id="latest" />
+    <Column id="first" />
+</DataTable>

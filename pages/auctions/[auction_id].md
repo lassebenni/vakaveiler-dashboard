@@ -92,9 +92,6 @@ GROUP BY 1, 2, 3
 order by 2 asc
 ```
 
-# Median Price per Hour
-
-
 ```sql price_stats
   select 
     max(median_price) as max_median_price,
@@ -151,6 +148,8 @@ order by 2 asc
     title="Best Moment to Buy"
     subtitle="Top 10 best buying times (low median price & high sales)"
  />
+
+The formula gives a combined score that takes into account both the relative price position and the relative sales count. A higher score indicates a better price moment, as it suggests that the current median price is relatively low compared to historical prices and that the sales count is relatively high.
 
  # Sales per Hour
 
